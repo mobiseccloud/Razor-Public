@@ -248,13 +248,14 @@ Details: [docs/getting-started/QUICKSTART.md](docs/getting-started/QUICKSTART.md
 
 ## 12b. Installation & trial request
 
-- **Supported targets:** Windows x64 (wizard `packaging/windows/razorzip-setup.iss`,
-  MSI alternative `packaging/windows/RazorZip.wxs`); Linux x64 Debian/RPM
+- **Supported targets:** Windows x64 (Inno Setup wizard
+  `packaging/windows/razorzip-setup.iss` — the only Windows deliverable; the
+  WiX/MSI alternative was removed); Linux x64 Debian/RPM
   (`packaging/linux/`). Packages install the **open harness (Core)**; the only
   allow-listed commercial binary is `razor-train.exe` (see `artifacts/hardened/README.md`).
   Architecture support beyond x64 is not claimed. **No installer has been
   compiled or test-installed in this release** (no Inno/WiX/dpkg toolchains on
-  the staging host) — the wizard/MSI/deb/rpm material is reviewed scaffolding
+  the staging host) — the wizard/deb/rpm material is reviewed scaffolding
   with fail-closed gates, not verified installers.
 - **GUI install (once built):** run the wizard (default `C:\Program Files\MobiSec\RazorZip`,
   per-user option offered but untested). On the **Request Your 14-Day RazorZip Enterprise
@@ -299,7 +300,7 @@ Details: [docs/getting-started/QUICKSTART.md](docs/getting-started/QUICKSTART.md
   quarantined — see MANIFEST); the installer scripts have never been compiled
   or test-installed here; license-loader paths are unverified (see LICENSE-DIRS.md);
   the `razor-watch` systemd unit is retained disabled-by-default scaffolding for a
-  quarantined binary; MSI silent/GPO installs exclude interactive email by design.
+  quarantined binary; silent installs exclude interactive email by design.
 
 ## 13. Support / contact
 

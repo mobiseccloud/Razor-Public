@@ -107,12 +107,10 @@ else {
   if ($LASTEXITCODE -ne 0) { Fail 'inno-setup' 'iscc failed' } else { Pass 'inno-setup' 'setup exe built into dist/' }
 }
 
-# 6. WiX MSI (alternative; toolchain-gated).
-$candle = Get-Command candle.exe -ErrorAction SilentlyContinue
-if (-not $candle) { Skip 'wix-msi' 'WiX v3 toolchain absent. Scaffolding present: packaging/windows/RazorZip.wxs' }
-else {
-  Skip 'wix-msi' 'WiX present but heat-harvest step not wired in this release; see RazorZip.wxs header'
-}
+# 6. WiX MSI: REMOVED as a deliverable (Windows delivery is Inno Setup only).
+# The former RazorZip.wxs was deleted; its payload fragments were never
+# generated and it was never compilable. Recorded as retired, not skipped.
+Rec 'wix-msi' 'RETIRED' 'WiX/MSI removed as a deliverable (Inno Setup only)'
 
 # 7. Harness selftest (evidence).
 try {

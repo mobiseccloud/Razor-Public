@@ -20,13 +20,13 @@
 5. Start Menu: **Razor Benchmark Harness** and **Request 14-Day Trial**
    (the latter launches the harness with `--request-trial`).
 
-### MSI alternative (managed deployments, Group Policy)
+### MSI alternative — REMOVED as a deliverable
 
-- Source: `packaging/windows/RazorZip.wxs` (WiX v3 `candle`/`light`).
-- The MSI **never opens an email client**, including silent installs.
-- Trial request post-install via GUI Trial tab, Start Menu shortcut, or CLI.
-- Uninstall removes program files only; user data and license state outside
-  the install directory are preserved. Upgrades do not overwrite user data.
+There is no MSI package. Windows delivery is Inno Setup only
+(`packaging/windows/razorzip-setup.iss`), which covers silent installs
+(`/SILENT`, `/VERYSILENT` skip the trial page; use the GUI Trial tab or
+`--request-trial` afterwards). The former WiX source was removed because its
+payload fragments were never generated and it was never compilable.
 
 ## Linux
 

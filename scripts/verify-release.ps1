@@ -88,7 +88,7 @@ if (Test-Path -LiteralPath $sln) {
 } else { Fail 'harness solution missing' }
 
 # 5. Packaging scaffolding present (buildable targets gated by toolchains/allow-list)
-foreach ($p in @('packaging\windows\razorzip-setup.iss', 'packaging\windows\RazorZip.wxs',
+foreach ($p in @(  'packaging\windows\razorzip-setup.iss',
   'packaging\linux\deb\razorzip\DEBIAN\control', 'packaging\linux\deb\razorzip\DEBIAN\postinst',
   'packaging\linux\deb\razorzip\usr\share\applications\razorzip-trial.desktop',
   'packaging\linux\rpm\razor-enterprise.spec', 'packaging\linux\rpm\razor-watch.service',

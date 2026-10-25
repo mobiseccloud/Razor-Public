@@ -13,6 +13,7 @@ history is not published here.
   deterministic small-input round-trip/verify-decode failures in this build
   (fail-closed; evidence corpora unaffected). Removed from the allow-list;
   re-ship requires a fixed build + full gate battery.
+- Removed WiX/MSI as a deliverable (unbuildable scaffolding; Inno Setup only).
 
 - Hardened deployment packaging (scaffolding, harness-only until allow-listed):
   Inno Setup wizard with trial-email page, WiX MSI alternative, Debian staging,
