@@ -50,7 +50,7 @@ C:\Temp
 # Explicitly KEEP (do not ignore):
 #   docs/benchmarks/*.csv   verified evidence
 #   assets/hero.jpeg
-#   assets/icon.jpg
+#   assets/icon_*.jpg       approved brand variants (primary/monochrome/darkmode)
 !docs/benchmarks/*.csv
 !assets/hero.jpeg
-!assets/icon.jpg
+!assets/icon_*.jpg
