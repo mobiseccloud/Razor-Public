@@ -4,6 +4,25 @@ Commercial 14-day trial. The licensing service itself is private; this document
 describes the boundary so a customer knows what happens and what never leaves
 this repo.
 
+## Request paths (all open, all manual-send)
+
+- **Installer wizard** (`packaging/windows/razorzip-setup.iss`, trial page):
+  Request Trial by Email / Copy Request Template. Skipped in silent installs.
+- **Harness GUI** (Trial tab): Request 14-Day Trial / Copy Request Template.
+- **CLI**: `RazorBenchmark --request-trial` (graphical) with printed fallback
+  on headless systems; `--copy-trial-template` prints the template.
+- **Linux desktop**: `razorzip-trial.desktop` opens the registered handler
+  with the same prefilled message.
+- **Manual**: copy `docs/trial/trial-request-template.txt` into an email to
+  `razor@mobisec.cloud`.
+
+Every path uses the same template (single source of truth:
+`docs/trial/trial-request-template.txt`, also installed as
+`trial-request-template.txt` next to the binaries). What happens on click:
+your email app opens with To/Subject/body prefilled — you review and press
+Send yourself. The app/installer cannot confirm sending and never claims it.
+No SMTP credentials, API keys, accounts, or private endpoints are involved.
+
 ```
 USER (structured email, template in REQUEST-TEMPLATE.md)
   │

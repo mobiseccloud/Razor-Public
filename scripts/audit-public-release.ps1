@@ -15,11 +15,17 @@ function Add-Failure($msg) { $script:failures += $msg; Write-Host "FAIL: $msg" -
 Write-Host "=== audit-public-release (powershell) ==="
 Write-Host "Root: $RepoRoot"
 
+# Regenerable build outputs are gitignored and never committed; they are
+# excluded from tree sweeps (commit-hygiene is enforced separately in step 6).
+$buildOutputDirs = '[\\/]((bin|obj|target|TestResults|node_modules)[\\/]|dist[\\/]|staging[\\/])'
+function Is-BuildOutput($fullName) { return $fullName -match $buildOutputDirs }
+
 # 1. Forbidden filename / extension sweep (.git internals excluded — history is
 # audited separately in step 5 via git plumbing, which never touches reflogs)
 $forbiddenName = @('\.lic$', '\.key$', '\.pem$', '\.pfx$', '\.p12$', '\.kdbx$', '(^|[/\\])\.env(\.|$)', 'approved-binaries\.txt$', 'razor\.lic$', 'id_rsa', 'id_ed25519')
 Get-ChildItem -LiteralPath $RepoRoot -Recurse -Force -File |
-  Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' } | ForEach-Object {
+  Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' } |
+  Where-Object { -not (Is-BuildOutput $_.FullName) } | ForEach-Object {
   $rel = $_.FullName.Substring($RepoRoot.Length)
   foreach ($pat in $forbiddenName) {
     if ($rel -match $pat) { Add-Failure "forbidden filename: $rel (pattern $pat)" }
@@ -32,6 +38,7 @@ Get-ChildItem -LiteralPath $RepoRoot -Recurse -Force -File |
 $allowedCode = @('^\\harness\\.*\.(cs|csproj|sln|axaml|axaml\.cs|resx|json)$', '^\\scripts\\.*$', '^\\.github\\.*$', '^\\.*\.md$', '^\\.*\.csv$', '^\\LICENSE$', '^\\.gitignore$')
 Get-ChildItem -LiteralPath $RepoRoot -Recurse -Force -File |
   Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' } |
+  Where-Object { -not (Is-BuildOutput $_.FullName) } |
   Where-Object { $_.Extension -match '^\.(cs|csproj|sln|rs|ps1|sh|yml|yaml|toml|go|java|py)$' } | ForEach-Object {
   $rel = $_.FullName.Substring($RepoRoot.Length)
   $ok = $false
@@ -46,7 +53,10 @@ $benignExceptions = @(
   @{ File = 'README.md'; Line = '(?i)razor-licgen., signing keys' },
   @{ File = 'ARCHITECTURE.md'; Line = '(?i)never in this repo|are never|signing keys,' },
   @{ File = 'SECURITY.md'; Line = '(?i)No signing keys,|never in this repo|are never' },
-  @{ File = 'docs\trial\OVERVIEW.md'; Line = '(?i)never (in|published)|private key, never|not the email|Never published|issued licenses, SMTP' }
+  @{ File = 'docs\trial\OVERVIEW.md'; Line = '(?i)never (in|published)|private key, never|not the email|Never published|issued licenses, SMTP|No SMTP credentials, API keys, accounts' }
+  @{ File = 'README.md'; Line = '(?i)no SMTP credentials' }
+  @{ File = 'TrialEmail.cs'; Line = '(?i)never needs SMTP credentials' }
+  @{ File = 'MainWindow.axaml'; Line = '(?i)No account, password, SMTP server' }
 )
 
 function Is-Benign($relPath, $line) {
@@ -84,6 +94,7 @@ $patterns = @(
 $textExts = @('.md', '.cs', '.csproj', '.sln', '.ps1', '.sh', '.yml', '.yaml', '.json', '.csv', '.txt', '.axaml')
 Get-ChildItem -LiteralPath $RepoRoot -Recurse -Force -File |
   Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' } |
+  Where-Object { -not (Is-BuildOutput $_.FullName) } |
   Where-Object { $textExts -contains $_.Extension -or $_.Extension -eq '' } |
   Where-Object { $_.FullName -notmatch 'scripts[\\/]audit-public-release\.(ps1|sh)$' } | ForEach-Object {
   try {
@@ -104,9 +115,11 @@ Get-ChildItem -LiteralPath $RepoRoot -Recurse -Force -File |
   } catch { }
 }
 
-# 4. Binary strings (assets + any exe/dll, if ever present; .git excluded)
+# 4. Binary strings (assets + any exe/dll, if ever present; .git and build
+# outputs excluded — shipped payloads are hashed in build manifests instead)
 Get-ChildItem -LiteralPath $RepoRoot -Recurse -Force -File |
   Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' } |
+  Where-Object { -not (Is-BuildOutput $_.FullName) } |
   Where-Object { $_.Extension -match '^\.(exe|dll|so|dylib|bin|jpeg|jpg|png)$' } | ForEach-Object {
   try {
     $bytes = [IO.File]::ReadAllBytes($_.FullName)
@@ -138,6 +151,17 @@ try {
     }
   } else {
     Write-Host "Not a git repo yet (expected pre-init) — history check deferred to post-init."
+  }
+  if ($isRepo) {
+    # 6. Commit hygiene: build outputs must be gitignored; anything else
+    # untracked-but-committable would silently enter the next commit.
+    $porcelain = git status --porcelain --ignored 2>$null
+    foreach ($line in $porcelain) {
+      if ($line -match '^\?\? (.*)') {
+        $rel = $Matches[1].Trim('"')
+        if ($rel -match '\.(lic|key|pem|pfx|p12|rs|pdb|env)$') { Add-Failure "untracked committable private file: $rel" }
+      }
+    }
   }
 } finally { Pop-Location }
 

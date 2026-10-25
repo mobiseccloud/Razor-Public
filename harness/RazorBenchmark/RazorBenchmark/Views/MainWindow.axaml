@@ -30,6 +30,21 @@
         </StackPanel>
       </ScrollViewer>
     </TabItem>
+    <TabItem Header="Trial">
+      <ScrollViewer>
+        <StackPanel Margin="8" Spacing="6">
+          <TextBlock Text="Request Your 14-Day RazorZip Enterprise Trial" FontWeight="Bold" />
+          <TextBlock Text="A trial request is submitted by email and a license is provided separately after review. This button only opens YOUR email app with a prefilled message — you review and send it yourself. No account, password, SMTP server, or embedded credential is involved. Available without a Pro/Enterprise license." TextWrapping="Wrap" />
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="Request Trial by Email" Command="{Binding RequestTrialCommand}" />
+            <Button Content="Copy Request Template" Command="{Binding CopyTrialTemplateCommand}" />
+          </StackPanel>
+          <TextBlock Text="{Binding TrialStatus}" TextWrapping="Wrap" />
+          <TextBlock Text="If no email app is available, copy the template below and send it manually:" TextWrapping="Wrap" />
+          <TextBox Text="{Binding TrialTemplatePreview}" IsReadOnly="True" AcceptsReturn="True" Height="260" />
+        </StackPanel>
+      </ScrollViewer>
+    </TabItem>
     <TabItem Header="Corpora">
       <StackPanel Margin="8" Spacing="6">
         <TextBlock Text="Corpus tabs — only datasets actually present/configured are listed." FontWeight="Bold" />

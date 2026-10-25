@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- RazorZip MSI (WiX v3). Managed-deployment alternative to the Inno installer.
+     SCOPE (same honesty rules as razorzip-setup.iss):
+     - Default build installs the OPEN harness only (Core). Commercial engine
+       components are included ONLY when built with -dCommercial=1 AND an
+       operator-approved allow-list verified every artifact + sidecar
+       (enforced by scripts/build-installers.ps1). Without it, the
+       CommercialEngine feature is excluded at compile time.
+     - The MSI NEVER opens an email client, including during silent/GPO install.
+       Trial requests happen post-install via the GUI "Trial" tab, the
+        "Request 14-Day Trial" Start Menu shortcut (request-trial flag), or the
+       installed trial-request-template.txt. Uninstall removes program files
+       only; user data and license state outside the install dir are preserved.
+     Build (harness-only, needs WiX v3 candle/light):
+       candle RazorZip.wxs -dHarnessDir=<dotnet publish dir> -o obj\ -arch x64
+       light obj\RazorZip.wixobj -o ..\..\..\dist\RazorZip-0.1.0.msi
+     Commercial: only via scripts/build-installers.ps1 (gated, fail-closed).
+-->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" Name="RazorZip" Language="1033" Version="0.1.0"
+           Manufacturer="Mobisec Cloud" UpgradeCode="{9D2E5F8A-1B4C-4D7E-8F0A-3C6D9E1F2A5B}">
+    <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine"
+             Description="RazorZip open harness installer (Core features)" />
+    <MajorUpgrade DowngradeErrorMessage="A newer version is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- perMachine default; managed deployment may override to perUser via
+         MSIINSTALLPERUSER=1 per standard WiX per-user patterns. -->
+
+    <Feature Id="Harness" Title="Benchmark harness (Core)" Level="1">
+      <ComponentGroupRef Id="HarnessFiles" />
+    </Feature>
+    <Feature Id="TrialShortcut" Title="Trial request shortcut" Level="1">
+      <ComponentRef Id="TrialShortcutComponent" />
+    </Feature>
+<?ifdef Commercial ?>
+    <Feature Id="CommercialEngine" Title="Commercial Razor engine (allow-listed)"
+             Description="Allow-listed commercial binaries + integrity sidecars only."
+             Level="1">
+      <ComponentGroupRef Id="CommercialFiles" />
+    </Feature>
+<?endif ?>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="MobiSecDir" Name="MobiSec">
+          <Directory Id="INSTALLFOLDER" Name="RazorZip">
+            <Directory Id="HarnessDir" Name="harness" />
+<?ifdef Commercial ?>
+            <Directory Id="EngineDir" Name="engine" />
+<?endif ?>
+          </Directory>
+        </Directory>
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="RazorMenu" Name="RazorZip" />
+      </Directory>
+    </Directory>
+
+    <!-- Harness payload file list is generated at build time by
+         scripts/build-installers.ps1 (heat harvest of $(var.HarnessDir))
+         into obj\HarnessFiles.wxs. The committed fragment below is the
+         stable hand-written part (shortcuts, template). -->
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Component Id="TrialTemplateComponent" Guid="{A1B2C3D4-1111-4222-8333-444455556666}">
+        <File Id="TrialTemplate" Name="trial-request-template.txt"
+              Source="..\..\docs\trial\trial-request-template.txt" />
+      </Component>
+      <Component Id="TrialShortcutComponent" Guid="{A1B2C3D4-7777-4222-8333-444455556666}"
+                 Directory="RazorMenu">
+        <Shortcut Id="TrialShortcut" Name="Request 14-Day Trial"
+                  Description="Open your email app with a prefilled trial request (nothing is sent automatically)"
+                  Target="[HarnessDir]RazorBenchmark.exe" Arguments="--request-trial"
+                  WorkingDirectory="HarnessDir" />
+        <RegistryValue Root="HKCU" Key="Software\MobiSec\RazorZip" Name="TrialShortcut"
+                       Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <FeatureRef Id="Harness">
+      <ComponentRef Id="TrialTemplateComponent" />
+    </FeatureRef>
+  </Product>
+</Wix>

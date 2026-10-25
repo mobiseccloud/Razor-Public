@@ -1,0 +1,7 @@
+#!/bin/sh
+# prerm: stop nothing automatically (the harness runs no services).
+# Commercial watcher services, if ever shipped allow-listed, are managed
+# explicitly by the administrator; this script never removes user data or
+# license state.
+set -e
+exit 0

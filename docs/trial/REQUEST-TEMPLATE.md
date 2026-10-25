@@ -1,9 +1,14 @@
 To: razor@mobisec.cloud
 Subject: RazorZip 14-Day Enterprise Trial Request
 
+Hello MobiSec Team,
+
+
+I would like to request a 14-day RazorZip Enterprise trial.
+
 
 --- BEGIN TRIAL REQUEST ---
-Email Address: user@domain.com
+Email Address: [Your Email Address]
 Given Name: [Your First Name]
 Last Name: [Your Last Name]
 Cell Number: [Your Phone Number]
@@ -12,3 +17,10 @@ Heard About From: [e.g., GitHub, Hacker News, Colleague]
 Country: [Your Country]
 Town/City: [Your City]
 --- END TRIAL REQUEST ---
+
+
+Please let me know the next steps for obtaining and activating my trial license.
+
+
+Kind regards,
+[Your Name]

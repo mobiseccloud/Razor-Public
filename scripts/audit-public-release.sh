@@ -10,28 +10,39 @@ fail() { echo "FAIL: $1"; FAIL=$((FAIL+1)); }
 echo "=== audit-public-release (sh) ==="
 echo "Root: $ROOT"
 
-# 1. Forbidden filenames + proprietary extensions (.git internals excluded —
-# history is audited separately in step 4 via git plumbing)
-forbidden="$(find "$ROOT" -type f ! -path "$ROOT/.git/*" \( -name '*.lic' -o -name '*.key' -o -name '*.pem' \
+BUILD_OUT='*/bin/*|*/obj/*|*/target/*|*/dist/*|*/staging/*'
+# 1. Forbidden filenames + proprietary extensions (.git internals and
+# regenerable build outputs excluded; commit hygiene is step 5)
+forbidden="$(find "$ROOT" -type f ! -path "$ROOT/.git/*" \
+  ! -path "*/bin/*" ! -path "*/obj/*" ! -path "*/target/*" \
+  ! -path "*/dist/*" ! -path "*/staging/*" \( -name '*.lic' -o -name '*.key' -o -name '*.pem' \
   -o -name '*.pfx' -o -name '*.p12' -o -name '.env' -o -name '.env.*' \
   -o -name 'approved-binaries.txt' -o -name 'razor.lic' \) 2>/dev/null)"
 if [ -n "$forbidden" ]; then echo "$forbidden" | while read -r f; do fail "forbidden filename: $f"; done; FAIL=$((FAIL+1)); fi
 
-rs_files="$(find "$ROOT" -type f ! -path "$ROOT/.git/*" -name '*.rs' 2>/dev/null)"
+rs_files="$(find "$ROOT" -type f ! -path "$ROOT/.git/*" \
+  ! -path "*/bin/*" ! -path "*/obj/*" ! -path "*/target/*" \
+  ! -path "*/dist/*" ! -path "*/staging/*" -name '*.rs' 2>/dev/null)"
 if [ -n "$rs_files" ]; then echo "$rs_files" | while read -r f; do echo "FAIL: proprietary Rust source: $f"; done; FAIL=$((FAIL+1)); fi
 
-pdb_files="$(find "$ROOT" -type f ! -path "$ROOT/.git/*" -name '*.pdb' 2>/dev/null)"
+pdb_files="$(find "$ROOT" -type f ! -path "$ROOT/.git/*" \
+  ! -path "*/bin/*" ! -path "*/obj/*" ! -path "*/target/*" \
+  ! -path "*/dist/*" ! -path "*/staging/*" -name '*.pdb' 2>/dev/null)"
 if [ -n "$pdb_files" ]; then echo "$pdb_files" | while read -r f; do echo "FAIL: PDB artifact: $f"; done; FAIL=$((FAIL+1)); fi
 
 # 2. Source allow-list (code outside harness/scripts/.github => STOP)
-bad_src="$(find "$ROOT" -type f ! -path "$ROOT/.git/*" \( -name '*.cs' -o -name '*.csproj' -o -name '*.sln' \
+bad_src="$(find "$ROOT" -type f ! -path "$ROOT/.git/*" \
+  ! -path "*/bin/*" ! -path "*/obj/*" ! -path "*/target/*" \
+  ! -path "*/dist/*" ! -path "*/staging/*" \( -name '*.cs' -o -name '*.csproj' -o -name '*.sln' \
   -o -name '*.rs' -o -name '*.py' -o -name '*.go' -o -name '*.java' \) \
   ! -path "$ROOT/harness/*" ! -path "$ROOT/scripts/*" ! -path "$ROOT/.github/*" 2>/dev/null)"
 if [ -n "$bad_src" ]; then echo "$bad_src" | while read -r f; do echo "FAIL: unexpected source outside allow-list: $f"; done; FAIL=$((FAIL+1)); fi
 
 # 3. Content patterns
 PAT='BEGIN.*PRIVATE KEY|PRIVATE KEY|razor-licgen|VMProtect|Reactor|license-signing|SIGNING_KEY|smtp|api[_-]?key|jwt[_-]?secret|connection string|mongodb(\+srv)?://|C:\\Temp|D:\\TestMicro|RAZOR_LICENSE|Razor\.Compression|razor-compress|StructuralLens|archival\.rs|razor[-_]train'
-raw_hits="$(grep -rEI --exclude-dir=.git --exclude='*.jpeg' --exclude='*.jpg' \
+raw_hits="$(grep -rEI --exclude-dir=.git --exclude-dir=bin --exclude-dir=obj \
+  --exclude-dir=dist --exclude-dir=staging --exclude-dir=target \
+  --exclude='*.jpeg' --exclude='*.jpg' \
   --exclude='audit-public-release.ps1' --exclude='audit-public-release.sh' \
   -e "$PAT" "$ROOT" 2>/dev/null || true)"
 # Reviewed-benign documentation lines (prohibition/absence statements, never values).
@@ -39,7 +50,8 @@ hits="$(printf '%s\n' "$raw_hits" | grep -v -e 'licensing service (razor-licgen'
   -e 'never in this repo' -e 'Never published' -e 'are never in this repo' \
   -e 'No "tamper-proof"' -e 'is not the email' -e 'not the email transport' \
   -e 'committed — enforced'   -e 'workflows contain no secrets' -e 'No signing keys,' -e 'issued licenses, SMTP' \
-  -e 'razor-licgen., signing keys' || true)"
+  -e 'razor-licgen., signing keys' -e 'no SMTP credentials' -e 'never needs SMTP' \
+  -e 'No account, password, SMTP server' -e 'No SMTP credentials, API keys, accounts' || true)"
 if [ -n "$hits" ]; then echo "$hits"; echo "FAIL: forbidden content patterns found"; FAIL=$((FAIL+1)); fi
 
 # 4. Git staged + history (if repo)

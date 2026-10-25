@@ -6,6 +6,8 @@ out/
 publish/
 TestResults/
 BenchmarkDotNet.Artifacts/
+dist/
+staging/
 
 # IDE
 .vs/

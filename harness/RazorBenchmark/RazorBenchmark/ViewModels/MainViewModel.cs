@@ -1,3 +1,5 @@
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RazorBenchmark.Models;
@@ -26,6 +28,9 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private string _roundTrip = "-";
     [ObservableProperty] private string _processStatus = "Idle. Pick a suite tab, verify the corpus, select engines, then Run.";
     [ObservableProperty] private string _engineAvailability = "Probing engines on PATH…";
+    [ObservableProperty] private string _trialStatus =
+        "No email has been sent. Requesting a trial opens YOUR email app with a prefilled message — you review and send it yourself. Available without a Pro/Enterprise license.";
+    [ObservableProperty] private string _trialTemplatePreview = TrialEmail.TemplateBody;
 
     public ObservableCollection<BenchmarkRow> Rows { get; } = new();
     public ObservableCollection<string> Suites { get; } = new(new[]
@@ -61,6 +66,47 @@ public partial class MainViewModel : ViewModelBase
             CsvService.Write(path, Rows.ToList());
         });
         ProcessStatus = $"Exported {Rows.Count} rows.";
+    }
+
+    [RelayCommand]
+    private void RequestTrial()
+    {
+        var uri = TrialEmail.BuildMailtoUri();
+        if (!TrialEmail.IsWithinSafeLength(uri))
+        {
+            TrialStatus = "The prefilled message is too long for an email link on this system. "
+                + "Use Copy Request Template and paste it into an email to "
+                + TrialEmail.Recipient + " yourself. Nothing has been sent.";
+            return;
+        }
+        var (outcome, message) = TrialEmail.TryOpenEmailClient(uri);
+        TrialStatus = outcome == TrialEmail.LaunchOutcome.Opened
+            ? message + " The application cannot tell whether you pressed Send."
+            : message + " Nothing has been sent.";
+    }
+
+    [RelayCommand]
+    private async Task CopyTrialTemplateAsync()
+    {
+        try
+        {
+            var clipboard = (Application.Current?.ApplicationLifetime
+                as IClassicDesktopStyleApplicationLifetime)?.MainWindow?.Clipboard;
+            if (clipboard is null)
+            {
+                TrialStatus = "Clipboard is unavailable here. Select the template text below and copy it manually, "
+                    + "then email it to " + TrialEmail.Recipient + ". Nothing has been sent.";
+                return;
+            }
+            await clipboard.SetTextAsync(
+                $"To: {TrialEmail.Recipient}\nSubject: {TrialEmail.Subject}\n\n{TrialEmail.TemplateBody}");
+            TrialStatus = "Request template copied. Paste it into an email to "
+                + TrialEmail.Recipient + " and send it yourself. Nothing has been sent automatically.";
+        }
+        catch (Exception ex)
+        {
+            TrialStatus = "Copy failed (" + ex.GetType().Name + "). Select the template text below and copy it manually. Nothing has been sent.";
+        }
     }
 
     [RelayCommand]

@@ -222,7 +222,58 @@ MCP may orchestrate the private workflow; it is not the email transport itself.
    select engines → run → export CSV (standard schema) → reload to review.
 5. Compare your CSV against `docs/benchmarks/suite1-max.csv` to confirm reproduction.
 
-Details: [docs/getting-started/QUICKSTART.md](docs/getting-started/QUICKSTART.md).
+Details: [docs/getting-started/QUICKSTART.md](docs/getting-started/QUICKSTART.md),
+[docs/getting-started/INSTALL.md](docs/getting-started/INSTALL.md).
+
+## 12b. Installation & trial request
+
+- **Supported targets:** Windows x64 (wizard `packaging/windows/razorzip-setup.iss`,
+  MSI alternative `packaging/windows/RazorZip.wxs`); Linux x64 Debian/RPM
+  (`packaging/linux/`). The default packages install the **open harness (Core)**;
+  commercial engine binaries are included only in allow-list-gated builds
+  (none in this release — see `artifacts/hardened/README.md`). Architecture
+  support beyond x64 is not claimed.
+- **GUI install:** run the wizard (default `C:\Program Files\MobiSec\RazorZip`,
+  per-user option offered). On the **Request Your 14-Day RazorZip Enterprise
+  Trial** page, **Request Trial by Email** opens *your* email app with To,
+  Subject, and the full template prefilled (correctly percent-encoded); you
+  review and press Send yourself. **Copy Request Template** copies the same
+  text as a fallback. The step never blocks installation and never sends
+  anything. Silent installs skip this page — use the installed GUI Trial tab
+  or CLI afterwards.
+- **In-app:** the harness **Trial** tab has the same **Request 14-Day Trial**
+  button (no license required to see it). Opening the email client is not
+  proof of sending — the app cannot know whether you pressed Send.
+- **CLI:** `RazorBenchmark --request-trial` opens the email handler on
+  graphical sessions; on headless/SSH systems it prints the recipient, subject,
+  and full template with manual instructions (exit 0). If no handler exists it
+  prints the manual path and exits non-zero — never a silent success.
+  `--copy-trial-template` prints the same text (no GUI popup from services).
+- **Linux desktop:** the package ships `razorzip-trial.desktop` (registered
+  handler via `xdg-open`, same encoded message) plus the same copy/print
+  fallback. No email client is a required dependency.
+- **No email is ever sent automatically;** no SMTP credentials, API keys, or
+  private endpoints exist anywhere in this flow.
+- **If no email app is available:** copy `docs/trial/trial-request-template.txt`
+  (installed alongside) into a message to `razor@mobisec.cloud` manually.
+- **Returned trial license:** do NOT drop files into assumed directories. The
+  issuance email defines placement (authoritative); see
+  [docs/security/LICENSE-DIRS.md](docs/security/LICENSE-DIRS.md) for the
+  unverified-path policy. Without a license, Core features work and gated
+  tiers explain they need a trial/paid license.
+- **Integrity:** where commercial artifacts ship (allow-listed only), each
+  executable installs with its detached `.integrity` sidecar and the loader
+  refuses modified/missing-sidecar binaries. Integrity checks detect
+  modification; they are not proof of tamper-proof software or an audit.
+- **Build packages:** `powershell ./scripts/build-installers.ps1` (Windows),
+  `sh scripts/build-installers.sh` (Linux). Both enforce the allow-list gate,
+  fail closed without toolchains, and write `dist/` + a build manifest.
+  Without an allow-list you get harness-only scaffolding, clearly marked —
+  never fake commercial features.
+- **Limitations:** packaging is harness-only until an allow-list authorizes
+  engine binaries; license-loader paths are unverified (see LICENSE-DIRS.md);
+  `razor-watch` systemd integration ships disabled-by-default and only in
+  commercial builds; MSI silent/GPO installs exclude interactive email.
 
 ## 13. Support / contact
 

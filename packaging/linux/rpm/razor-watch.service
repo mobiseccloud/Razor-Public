@@ -1,0 +1,25 @@
+[Unit]
+Description=Razor watch service (commercial, allow-listed only)
+Documentation=https://github.com/mobisec-cloud/razor
+# Installed ONLY by allow-list-gated commercial packages. This unit is shipped
+# DISABLED: administrators enable/start it explicitly after reviewing service
+# permissions. The package %post never enables or starts it automatically.
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# Run as an unprivileged service account created by the administrator.
+# User=/Group= MUST be set by the deploying organization; the package does not
+# invent privileged identities.
+User=nobody
+Group=nogroup
+ExecStart=/usr/lib/razorzip/engine/razor-watch --service
+Restart=on-failure
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

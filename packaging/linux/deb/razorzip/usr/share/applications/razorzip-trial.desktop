@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=RazorZip Trial Request
+Comment=Open your email app with a prefilled 14-day Enterprise trial request (nothing is sent automatically)
+Exec=xdg-open "mailto:razor%40mobisec.cloud?subject=RazorZip%2014-Day%20Enterprise%20Trial%20Request&body=Hello%20MobiSec%20Team%2C%0A%0A%0AI%20would%20like%20to%20request%20a%2014-day%20RazorZip%20Enterprise%20trial.%0A%0A%0A---%20BEGIN%20TRIAL%20REQUEST%20---%0AEmail%20Address%3A%20%5BYour%20Email%20Address%5D%0AGiven%20Name%3A%20%5BYour%20First%20Name%5D%0ALast%20Name%3A%20%5BYour%20Last%20Name%5D%0ACell%20Number%3A%20%5BYour%20Phone%20Number%5D%0ABusiness%20Name%3A%20%5BCompany%20Name%20or%20write%20%22PRIVATE%22%5D%0AHeard%20About%20From%3A%20%5Be.g.%2C%20GitHub%2C%20Hacker%20News%2C%20Colleague%5D%0ACountry%3A%20%5BYour%20Country%5D%0ATown%2FCity%3A%20%5BYour%20City%5D%0A---%20END%20TRIAL%20REQUEST%20---%0A%0A%0APlease%20let%20me%20know%20the%20next%20steps%20for%20obtaining%20and%20activating%20my%20trial%20license.%0A%0A%0AKind%20regards%2C%0A%5BYour%20Name%5D%0A"
+# Encoded from docs/trial/trial-request-template.txt; canonical bytes in
+# packaging/shared/trial-mailto.txt. If a handler truncates the body, use the
+# installed GUI Trial tab "Copy Request Template" instead — never silently send partial text.
+Icon=razorzip
+Terminal=false
+Categories=Utility;
+Keywords=razorzip;trial;license;
+X-Reason-Not-Mandatory-Dependency=An email client MUST NOT be a package dependency; missing handlers fall back to copy/print.

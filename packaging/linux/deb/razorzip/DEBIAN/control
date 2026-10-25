@@ -1,0 +1,12 @@
+Package: razorzip-harness
+Version: 0.1.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: Mobisec Cloud <razor@mobisec.cloud>
+Description: RazorZip open benchmark harness (Core features)
+ The open-source benchmark GUI + CLI helpers for the Razor structural
+ compression engine. Commercial engine binaries are NOT included: they ship
+ only in allow-list-gated packages built by scripts/build-installers.sh.
+ Trial requests open the user's own email app, prefilled; nothing is sent
+ automatically and no credentials are embedded.

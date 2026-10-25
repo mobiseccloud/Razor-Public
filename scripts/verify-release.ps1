@@ -73,7 +73,18 @@ if (Test-Path -LiteralPath $sln) {
   } catch { Fail "harness build exception: $_" }
 } else { Fail 'harness solution missing' }
 
-# 5. Required docs present
+# 5. Packaging scaffolding present (buildable targets gated by toolchains/allow-list)
+foreach ($p in @('packaging\windows\razorzip-setup.iss', 'packaging\windows\RazorZip.wxs',
+  'packaging\linux\deb\razorzip\DEBIAN\control', 'packaging\linux\deb\razorzip\DEBIAN\postinst',
+  'packaging\linux\deb\razorzip\usr\share\applications\razorzip-trial.desktop',
+  'packaging\linux\rpm\razor-enterprise.spec', 'packaging\linux\rpm\razor-watch.service',
+  'packaging\shared\trial-mailto.txt', 'docs\trial\trial-request-template.txt',
+  'docs\getting-started\INSTALL.md', 'docs\security\LICENSE-DIRS.md',
+  'scripts\build-installers.ps1', 'scripts\build-installers.sh')) {
+  if (Test-Path -LiteralPath (Join-Path $RepoRoot $p)) { Pass "packaging $p present" } else { Fail "packaging $p missing" }
+}
+
+# 6. Required docs present
 foreach ($d in @('README.md','LICENSE','SECURITY.md','SUPPORT.md','CHANGELOG.md','BENCHMARKS.md','CORPUS.md','FORMAT.md','ARCHITECTURE.md')) {
   if (Test-Path -LiteralPath (Join-Path $RepoRoot $d)) { Pass "doc $d present" } else { Fail "doc $d missing" }
 }

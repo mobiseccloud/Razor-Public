@@ -1,0 +1,14 @@
+#!/bin/sh
+# postinst for razorzip-harness. MUST NOT send email, create licenses, or
+# contact any licensing service. Desktop integration only.
+set -e
+if command -v update-desktop-database >/dev/null 2>&1; then
+  update-desktop-database /usr/share/applications >/dev/null 2>&1 || true
+fi
+if [ -x /usr/lib/razorzip/harness/RazorBenchmark ]; then
+  echo "razorzip-harness: installed under /usr/lib/razorzip/harness."
+  echo "Request a trial from the GUI Trial tab or: RazorBenchmark --request-trial"
+fi
+# Commercial engine sidecars (if ever present via allow-listed package):
+# verified by the engine's own loader at startup, never here.
+exit 0

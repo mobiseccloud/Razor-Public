@@ -6,6 +6,17 @@ history is not published here.
 
 ## [Unreleased]
 
+- Hardened deployment packaging (scaffolding, harness-only until allow-listed):
+  Inno Setup wizard with trial-email page, WiX MSI alternative, Debian staging,
+  RPM spec, Linux desktop trial entry, gated `build-installers.ps1/.sh`.
+- One-click trial workflow: GUI Trial tab, `--request-trial` /
+  `--copy-trial-template` CLI, installer buttons, desktop entry — all open the
+  user's own email client prefilled (mailto, UTF-8 percent-encoded) or fall
+  back to copy/print. Never auto-sends; no credentials embedded. Template
+  source of truth: `docs/trial/trial-request-template.txt`.
+- License directories documented as PROPOSED/UNVERIFIED
+  (`docs/security/LICENSE-DIRS.md`); installers provision none.
+
 - Initial public Razor / RazorZip release staging (this change).
 - Harness: Avalonia (.NET 10) open benchmark GUI.
 - Evidence: Suite 1 verified CSVs (62 files / 616.9 MB, zero RT-FAILs in the
