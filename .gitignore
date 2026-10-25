@@ -1,0 +1,54 @@
+# Build outputs
+bin/
+obj/
+target/
+out/
+publish/
+TestResults/
+BenchmarkDotNet.Artifacts/
+
+# IDE
+.vs/
+.idea/
+*.user
+*.suo
+*.sln.docstates
+.vscode/settings.json
+
+# Debug symbols (unless explicitly approved)
+*.pdb
+*.mdb
+
+# Temp / logs
+*.tmp
+*.log
+*.tlog
+*.lastbuildstate
+
+# Secrets — never commit
+*.lic
+*.key
+*.pem
+*.pfx
+*.p12
+*.kdbx
+.env
+.env.*
+secrets.json
+appsettings.*.Private.json
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*~
+
+# Local-only paths (maintainer estate, never in repo)
+C:\Temp
+
+# Explicitly KEEP (do not ignore):
+#   docs/benchmarks/*.csv   verified evidence
+#   assets/hero.jpeg
+#   assets/icon.jpg
+!docs/benchmarks/*.csv
+!assets/hero.jpeg
+!assets/icon.jpg

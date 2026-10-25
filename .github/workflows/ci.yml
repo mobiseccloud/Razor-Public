@@ -1,0 +1,41 @@
+name: public-release-ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  audit-and-verify:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Source leak / red-team audit
+        shell: pwsh
+        run: ./scripts/audit-public-release.ps1
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Verify release (CSV schema, manifests, harness build)
+        shell: pwsh
+        run: ./scripts/verify-release.ps1
+      - name: Harness headless smoke (CSV reload + engine probe)
+        shell: pwsh
+        run: |
+          dotnet run --project harness/RazorBenchmark/RazorBenchmark --no-build -c Release -- --selftest
+          dotnet run --project harness/RazorBenchmark/RazorBenchmark --no-build -c Release -- --csvcheck docs/benchmarks/suite1-max.csv
+          dotnet run --project harness/RazorBenchmark/RazorBenchmark --no-build -c Release -- --engines
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Build harness (Linux)
+        run: dotnet build harness/RazorBenchmark/RazorBenchmark.sln -c Release --nologo

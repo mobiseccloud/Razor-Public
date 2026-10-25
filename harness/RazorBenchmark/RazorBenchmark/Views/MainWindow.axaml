@@ -1,0 +1,54 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RazorBenchmark.ViewModels"
+        x:Class="RazorBenchmark.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="Razor Benchmark Harness (open test harness)"
+        Icon="/Assets/icon.jpg"
+        Width="1100" Height="720">
+  <TabControl Margin="8">
+    <TabItem Header="Dashboard">
+      <ScrollViewer>
+        <StackPanel Spacing="6" Margin="8">
+          <TextBlock Text="Razor Benchmark — open test harness (engines run as external processes)" FontWeight="Bold" />
+          <TextBlock Text="{Binding ProcessStatus}" TextWrapping="Wrap" />
+          <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Suite: " /><TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Suite}" />
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Current file: " /><TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CurrentFile}" />
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Engine/Tier: " /><TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Engine}" />
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Progress: " /><ProgressBar Grid.Row="3" Grid.Column="1" Minimum="0" Maximum="100" Value="{Binding Progress}" Height="16" />
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Elapsed / ETA: " /><TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Elapsed}" />
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="ETA: " /><TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Eta}" />
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="Bytes (orig → comp): " /><TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding OriginalBytes}" />
+            <TextBlock Grid.Row="7" Grid.Column="0" Text="Ratio / RT: " /><TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding Ratio}" />
+          </Grid>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="Export CSV" Command="{Binding ExportCsvCommand}" />
+            <Button Content="Cancel" Command="{Binding CancelCommand}" />
+          </StackPanel>
+          <DataGrid ItemsSource="{Binding Rows}" AutoGenerateColumns="True" IsReadOnly="True" Height="280" />
+        </StackPanel>
+      </ScrollViewer>
+    </TabItem>
+    <TabItem Header="Corpora">
+      <StackPanel Margin="8" Spacing="6">
+        <TextBlock Text="Corpus tabs — only datasets actually present/configured are listed." FontWeight="Bold" />
+        <ListBox ItemsSource="{Binding Suites}" SelectedItem="{Binding Suite}" />
+        <TextBlock Text="Use the manifest-pinned downloader (SHA-256 verified, mismatch rejected). Local-only entries are skipped, never fabricated." TextWrapping="Wrap" />
+      </StackPanel>
+    </TabItem>
+    <TabItem Header="Engines">
+      <StackPanel Margin="8" Spacing="6">
+        <TextBlock Text="Engine selection — missing tools show unavailable + official docs link. Nothing is silently downloaded." FontWeight="Bold" />
+        <ListBox ItemsSource="{Binding Engines}">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <TextBlock Text="{Binding Name}" />
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+        <TextBlock Text="{Binding EngineAvailability}" TextWrapping="Wrap" />
+      </StackPanel>
+    </TabItem>
+  </TabControl>
+</Window>

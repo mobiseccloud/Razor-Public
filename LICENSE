@@ -1,0 +1,61 @@
+PUBLIC RELEASE LICENSING — mobisec-cloud/razor (Razor / RazorZip)
+
+1) OPEN MATERIAL (MIT License)
+
+   The following directories in THIS public repository are MIT-licensed:
+
+     harness/**          open-source benchmark harness (C#, Avalonia UI, .NET)
+     scripts/**          audit and verification scripts
+     .github/**          CI workflows (no secrets)
+
+   Plus the descriptive documentation in this repository
+   (README.md, BENCHMARKS.md, CORPUS.md, FORMAT.md, ARCHITECTURE.md,
+   SECURITY.md, SUPPORT.md, CHANGELOG.md, docs/**) which is provided for
+   informational use.
+
+   MIT License text:
+
+   Copyright (c) 2026 Mobisec Cloud
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of the MIT-licensed material listed above, to deal in the material without
+   restriction, including without limitation the rights to use, copy, modify,
+   merge, publish, distribute, sublicense, and/or sell copies of the material,
+   and to permit persons to whom the material is furnished to do so, subject to
+   the following conditions:
+
+   The above copyright notice and this permission notice shall be included in all
+   copies or substantial portions of the MIT-licensed material.
+
+   THE MIT-LICENSED MATERIAL IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+   EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES
+   OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+   ARISING FROM, OUT OF OR IN CONNECTION WITH THE MATERIAL OR THE USE OR OTHER
+   DEALINGS IN THE MATERIAL.
+
+2) BENCHMARK DATA
+
+   CSV evidence under docs/benchmarks/ is published for verification and
+   reproduction. You may use, quote and redistribute the CSV files with
+   attribution to this repository. The underlying third-party corpora remain
+   governed by their own licenses (see CORPUS.md); corpus files themselves
+   are NOT redistributed here.
+
+3) COMMERCIAL ENGINE (NOT in this repository unless explicitly added)
+
+   The Razor commercial compression/protection engine, RazorTrain, profile
+   generation, licensing service (razor-licgen), signing keys, production
+   licenses, and any hardened commercial binaries are PROPRIETARY and are
+   governed by a separate written commercial agreement with Mobisec Cloud.
+
+   No proprietary source is included in this repository. A published binary
+   does not imply that its source may be published.
+
+   This repository intentionally ships with NO commercial binaries: no
+   operator-approved allow-list (approved-binaries.txt) was provided at
+   release-staging time, so the binary gate was enforced and nothing was
+   copied (see artifacts/hardened/README.md).
+
+   For licensing inquiries: razor@mobisec.cloud

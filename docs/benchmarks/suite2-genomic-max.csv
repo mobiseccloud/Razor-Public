@@ -1,0 +1,6 @@
+﻿suite,corpus,file,engine,tier,original_bytes,compressed_bytes,ratio_percent,encode_ms,decode_ms,encode_mb_s,decode_mb_s,round_trip,status,timestamp_utc,host,threads,binary_version,format_version
+suite2,genomic,E.coli,Razor,Max,4638690,1149250,24.78,55456,45,0.084,103.082,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,genomic,E.coli,gzip,default,4638690,1300301,28.03,2788,17,1.664,272.864,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,genomic,E.coli,brotli,q11,4638690,1138058,24.53,13876,19,0.334,244.142,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,genomic,E.coli,zstd,19,4638690,1151083,24.81,3344,5,1.387,927.738,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,genomic,E.coli,xz,9e,4638690,1188292,25.62,4205,69,1.103,67.227,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival

@@ -1,0 +1,7 @@
+﻿suite,corpus,file,engine,tier,original_bytes,compressed_bytes,ratio_percent,encode_ms,decode_ms,encode_mb_s,decode_mb_s,round_trip,status,timestamp_utc,host,threads,binary_version,format_version
+suite1,enwik8,enwik8,Razor,Max,100000000,29058303,29.06,763491,771,0.131,129.702,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,enwik8,enwik8,gzip,default,100000000,36460113,36.46,5379,482,18.591,207.469,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,enwik8,enwik8,deflate,default,100000000,36460095,36.46,5284,477,18.925,209.644,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,enwik8,enwik8,brotli,q11,100000000,27055870,27.06,201929,417,0.495,239.808,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,enwik8,enwik8,zstd,19,100000000,26936936,26.94,58590,264,1.707,378.788,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,enwik8,enwik8,xz,9e,100000000,24856816,24.86,95708,1464,1.045,68.306,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival

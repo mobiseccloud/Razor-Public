@@ -1,0 +1,11 @@
+﻿suite,corpus,file,engine,tier,original_bytes,compressed_bytes,ratio_percent,encode_ms,decode_ms,encode_mb_s,decode_mb_s,round_trip,status,timestamp_utc,host,threads,binary_version,format_version
+suite2,neuro,asl16.nii,Razor,Max,19071328,7082819,37.14,291063,264,0.066,72.24,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,neuro,asl16.nii,gzip,default,19071328,10408545,54.58,3387,93,5.631,205.068,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,neuro,asl16.nii,brotli,q11,19071328,8275879,43.39,37091,148,0.514,128.86,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,neuro,asl16.nii,zstd,19,19071328,9035852,47.38,11042,76,1.727,250.939,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,neuro,asl16.nii,xz,9e,19071328,7934840,41.61,12579,452,1.516,42.193,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,neuro,asl32.nii,Razor,Max,38142304,13755433,36.06,396029,303,0.096,125.882,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,neuro,asl32.nii,gzip,default,38142304,16494541,43.24,1848,75,20.64,508.564,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,neuro,asl32.nii,brotli,q11,38142304,15191902,39.83,64471,239,0.592,159.591,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,neuro,asl32.nii,zstd,19,38142304,16083045,42.17,10018,63,3.807,605.433,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,neuro,asl32.nii,xz,9e,38142304,14515288,38.06,8953,828,4.26,46.066,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival

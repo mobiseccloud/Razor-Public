@@ -1,0 +1,11 @@
+﻿suite,corpus,file,engine,tier,original_bytes,compressed_bytes,ratio_percent,encode_ms,decode_ms,encode_mb_s,decode_mb_s,round_trip,status,timestamp_utc,host,threads,binary_version,format_version
+suite2,logs,gh-2026-10-22-12.json,Razor,Max,50020916,8004687,16,376707,296,0.133,168.99,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,logs,gh-2026-10-22-12.json,gzip,default,50020916,10911923,21.81,1764,135,28.357,370.525,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,logs,gh-2026-10-22-12.json,brotli,q11,50020916,7254755,14.5,91164,137,0.549,365.116,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,logs,gh-2026-10-22-12.json,zstd,19,50020916,7502844,15,20995,75,2.383,666.946,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,logs,gh-2026-10-22-12.json,xz,9e,50020916,6952888,13.9,24752,549,2.021,91.113,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,logs,nasa-jul95.log,Razor,Max,205242368,14112296,6.88,1667830,861,0.123,238.377,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,logs,nasa-jul95.log,gzip,default,205242368,19643282,9.57,4593,290,44.686,707.732,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,logs,nasa-jul95.log,brotli,q11,205242368,12714594,6.19,437613,287,0.469,715.13,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,logs,nasa-jul95.log,zstd,19,205242368,12834933,6.25,124199,224,1.653,916.261,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,logs,nasa-jul95.log,xz,9e,205242368,13598020,6.63,115638,1234,1.775,166.323,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival

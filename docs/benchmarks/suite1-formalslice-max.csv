@@ -1,0 +1,61 @@
+﻿suite,corpus,file,engine,tier,original_bytes,compressed_bytes,ratio_percent,encode_ms,decode_ms,encode_mb_s,decode_mb_s,round_trip,status,timestamp_utc,host,threads,binary_version,format_version
+suite1,formalslice,30mb.bmp,Razor,Max,32455906,32456468,100,45798,101,0.709,321.346,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.bmp,gzip,default,32455906,32461039,100.02,1027,14,31.603,2318.279,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.bmp,deflate,default,32455906,32461021,100.02,1037,14,31.298,2318.279,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.bmp,brotli,q11,32455906,32456006,100,28995,14,1.119,2318.279,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.bmp,zstd,19,32455906,32456660,100,6761,12,4.8,2704.659,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.bmp,xz,9e,32455906,32457476,100,9459,99,3.431,327.837,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.jpg,Razor,Max,31800000,847943,2.67,39220,133,0.811,239.098,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.jpg,gzip,default,31800000,31742648,99.82,1067,98,29.803,324.49,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.jpg,deflate,default,31800000,31742630,99.82,1082,99,29.39,321.212,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.jpg,brotli,q11,31800000,599633,1.89,4375,71,7.269,447.887,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.jpg,zstd,19,31800000,606025,1.91,100,14,318,2271.429,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.jpg,xz,9e,31800000,608160,1.91,4836,98,6.576,324.49,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.pdf,Razor,Max,31524762,2139708,6.79,210788,128,0.15,246.287,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.pdf,gzip,default,31524762,3424152,10.86,611,49,51.595,643.362,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.pdf,deflate,default,31524762,3424134,10.86,608,48,51.85,656.766,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.pdf,brotli,q11,31524762,1887155,5.99,55657,41,0.566,768.897,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.pdf,zstd,19,31524762,2049590,6.5,13845,26,2.277,1212.491,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.pdf,xz,9e,31524762,1972760,6.26,10920,182,2.887,173.213,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.rtf,Razor,Max,31467295,2927,0.01,33954,139,0.927,226.383,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.rtf,gzip,default,31467295,106937,0.34,58,21,542.54,1498.443,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.rtf,deflate,default,31467295,106919,0.34,56,20,561.916,1573.365,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.rtf,brotli,q11,31467295,182,0,914,64,34.428,491.676,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.rtf,zstd,19,31467295,2763,0.01,44,15,715.166,2097.82,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.rtf,xz,9e,31467295,4828,0.02,2151,97,14.629,324.405,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.txt,Razor,Max,30485773,1750,0.01,14603,124,2.088,245.853,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.txt,gzip,default,30485773,73982,0.24,59,22,516.708,1385.717,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.txt,deflate,default,30485773,73964,0.24,54,19,564.551,1604.514,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.txt,brotli,q11,30485773,74,0,871,63,35.001,483.901,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.txt,zstd,19,30485773,2598,0.01,43,20,708.971,1524.289,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.txt,xz,9e,30485773,4592,0.02,2067,94,14.749,324.317,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.xml,Razor,Max,31895088,3156190,9.9,224698,132,0.142,241.629,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.xml,gzip,default,31895088,4162222,13.05,720,59,44.299,540.595,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.xml,deflate,default,31895088,4162204,13.05,720,57,44.299,559.563,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.xml,brotli,q11,31895088,2749056,8.62,72835,40,0.438,797.377,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.xml,zstd,19,31895088,2661898,8.35,20094,41,1.587,777.929,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,30mb.xml,xz,9e,31895088,2746068,8.61,12320,209,2.589,152.608,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,RCoRes64.dat,Razor,Max,72520608,751009,1.04,351397,281,0.206,258.08,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,RCoRes64.dat,gzip,default,72520608,2788603,3.85,1252,57,57.924,1272.291,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,RCoRes64.dat,deflate,default,72520608,2788585,3.85,1249,55,58.063,1318.557,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,RCoRes64.dat,brotli,q11,72520608,353843,0.49,26098,43,2.779,1686.526,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,RCoRes64.dat,zstd,19,72520608,359973,0.5,2774,31,26.143,2339.374,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,RCoRes64.dat,xz,9e,72520608,330020,0.46,12350,233,5.872,311.247,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,firefox passwords.csv,Razor,Max,46778,12794,27.35,1131,0,0.041,0,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,firefox passwords.csv,gzip,default,46778,15156,32.4,2,0,23.389,0,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,firefox passwords.csv,deflate,default,46778,15138,32.36,2,0,23.389,0,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,firefox passwords.csv,brotli,q11,46778,12740,27.24,60,0,0.78,0,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,firefox passwords.csv,zstd,19,46778,13479,28.81,13,0,3.598,0,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,firefox passwords.csv,xz,9e,46778,13224,28.27,19,0,2.462,0,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,sitemap.xml,Razor,Max,1529,395,25.83,65,0,0.024,0,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,sitemap.xml,gzip,default,1529,431,28.19,0,0,0,0,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,sitemap.xml,deflate,default,1529,413,27.01,0,0,0,0,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,sitemap.xml,brotli,q11,1529,340,22.24,3,0,0.51,0,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,sitemap.xml,zstd,19,1529,425,27.8,0,0,0,0,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,sitemap.xml,xz,9e,1529,484,31.65,1,0,1.529,0,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,vmfirmwarehcl.dll,Razor,Max,36177312,5781708,15.98,235248,303,0.154,119.397,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,vmfirmwarehcl.dll,gzip,default,36177312,11637282,32.17,2797,115,12.934,314.585,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,vmfirmwarehcl.dll,deflate,default,36177312,11637264,32.17,2800,114,12.92,317.345,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,vmfirmwarehcl.dll,brotli,q11,36177312,7917910,21.89,51978,143,0.696,252.988,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,vmfirmwarehcl.dll,zstd,19,36177312,2879907,7.96,2748,32,13.165,1130.541,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite1,formalslice,vmfirmwarehcl.dll,xz,9e,36177312,1976700,5.46,8544,218,4.234,165.951,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival

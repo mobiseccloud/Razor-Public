@@ -1,0 +1,11 @@
+﻿suite,corpus,file,engine,tier,original_bytes,compressed_bytes,ratio_percent,encode_ms,decode_ms,encode_mb_s,decode_mb_s,round_trip,status,timestamp_utc,host,threads,binary_version,format_version
+suite2,scale,enwik9-part1-of-2.bin,Razor,Max,500000000,133930088,26.79,3266451,3367,0.153,148.5,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,scale,enwik9-part1-of-2.bin,gzip,default,500000000,169812198,33.96,23540,2182,21.24,229.148,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,scale,enwik9-part1-of-2.bin,brotli,q11,500000000,124394336,24.88,960363,1736,0.521,288.018,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,scale,enwik9-part1-of-2.bin,zstd,19,500000000,124183645,24.84,252029,1069,1.984,467.727,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,scale,enwik9-part1-of-2.bin,xz,9e,500000000,112518380,22.5,398466,6354,1.255,78.691,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,scale,enwik9-part2-of-2.bin,Razor,Max,500000000,119702607,23.94,3255838,3201,0.154,156.201,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,scale,enwik9-part2-of-2.bin,gzip,default,500000000,152961097,30.59,20479,1902,24.415,262.881,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,scale,enwik9-part2-of-2.bin,brotli,q11,500000000,110965201,22.19,992321,1467,0.504,340.832,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,scale,enwik9-part2-of-2.bin,zstd,19,500000000,111141566,22.23,268946,1175,1.859,425.532,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
+suite2,scale,enwik9-part2-of-2.bin,xz,9e,500000000,101003056,20.2,431642,6164,1.158,81.116,OK,PASS,2026-10-24T00:00:00Z,windows-dev-estate,1,2026-10-24-max,archival
