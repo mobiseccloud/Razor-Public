@@ -21,10 +21,10 @@ by design.
   protected binary. The launcher verifies the record before execution:
   > Detached integrity verification detects modification of protected binaries and
   > prevents execution when the expected integrity record does not match.
-- **Tamper-negative behaviour:** modified binary → execution refused; missing
-  sidecar → execution refused. (Verified per release by `scripts/verify-release.ps1`
-  when binaries are present under an allow-list. This release ships no binaries —
-  see `artifacts/hardened/README.md`.)
+- **Tamper-negative behaviour:** modified binary → execution refused (abnormal
+  termination, no run); missing/corrupt sidecar → execution refused (exit 1,
+  verified on the staged `razor-train.exe` by `scripts/verify-release.ps1`).
+  See `artifacts/hardened/MANIFEST.txt` for the per-release gate record.
 - **SFX password (offline mode, where shipped):** AES-256-GCM with Argon2id-derived
   key. Incorrect password or corrupted payload fails at the authentication tag —
   no plaintext is produced.

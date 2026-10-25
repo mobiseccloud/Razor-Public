@@ -52,9 +52,11 @@ Conclusions in this file are drawn only from the verified CSV evidence shipped i
 
 See [ARCHITECTURE.md](ARCHITECTURE.md). Summary:
 
-- **Harness (open, MIT):** `harness/` — Avalonia (.NET) GUI + CSV pipeline. Discovers
-  corpora via manifests, detects engines on PATH / configured paths, runs each file,
-  verifies byte-identical round-trip, writes the standard CSV schema.
+- **Harness (open, MIT):** `harness/` — Avalonia (.NET) GUI + CSV schema +
+  engine-availability probing + trial-request workflow. The matrix runner and
+  corpus downloader exist as library code not yet wired to UI actions
+  (see QUICKSTART for the exact current scope). The harness never compiles or
+  links proprietary source.
 - **Commercial engine (proprietary, not in this repo):** invoked strictly as an
   external process. The harness never compiles or links proprietary source.
 - **Protection services (optional, commercial):** detached `.integrity` sidecars,
@@ -102,18 +104,22 @@ Where a workload is discussed without shipped CSV evidence, it is labelled as su
 
 `harness/RazorBenchmark/` — open-source, cross-platform (Avalonia UI, .NET 10):
 
-- **Dashboard:** suite, corpus, current file, engine, tier, progress %, elapsed, ETA
-  (shows "calculating" until stable — no fake precision), original/compressed bytes,
-  ratio, encode/decode time, encode/decode MB/s, round-trip status, process status.
-- **Corpus tabs:** Suite 1 Core, Neuro, Genomic, Logs, Adversarial, Enwik9 Scale —
-  each tab only lists datasets actually present/configured.
-- **Engine selection:** Razor Max, MaxFast, Fast/Stream (where installed), Brotli q11,
-  Zstd, XZ, gzip, deflate. Missing tools show *unavailable* with official
-  documentation links; nothing is silently downloaded.
-- **Corpus downloader:** manifest-pinned source URL, version/date, expected size,
-  SHA-256, license/provenance, cache location; progress %, retry, failure reporting,
-  hash verification, mismatch rejection, no silent corruption acceptance.
-- **CSV:** writes and reloads the standard schema below.
+- **Dashboard:** suite/file/engine/tier readouts, progress bar, elapsed/ETA
+  placeholders, byte/ratio/round-trip fields, process status; `Export CSV`
+  writes the standard schema, `Cancel` cancels. No Run action exists yet.
+- **Corpus view:** a single list (Suite 1 Core, Neuro, Genomic, Logs,
+  Adversarial, Enwik9 Scale) for suite selection — per-suite tabs,
+  Verify/Download buttons, and progress display are not implemented; the
+  `DownloaderService` class is library-only.
+- **Engine view:** availability report (installed / not-configured /
+  unavailable + official docs links); nothing is silently downloaded.
+  No enable toggles or path configuration UI exist yet.
+- **Corpus downloader (library only):** manifest-pinned source URL,
+  version/date, expected size, SHA-256, license/provenance, cache location;
+  progress %, retry, failure reporting, hash verification, mismatch rejection
+  are implemented in `DownloaderService` but not wired to any control.
+- **CSV:** writes the standard schema below; reload is verified headless via
+  `--csvcheck` (no in-app Reload control exists yet).
 
 Required CSV schema (`harness` reads/writes exactly this header):
 
@@ -220,16 +226,22 @@ MCP may orchestrate the private workflow; it is not the email transport itself.
   XZ/Zstd retain the advantage there in the verified tables.
 - **Speeds** are encode wall-clock on the measuring host and move with load;
   ratios are the comparable signal.
-- **ETA** in the harness is explicitly approximate until stable.
+- **ETA** field exists in the Dashboard but no benchmark run can populate it yet
+  (no Run path is wired); treat it as a placeholder until the GUI workflow milestone.
 
 ## 12. Getting started
 
 1. Install .NET 10 SDK.
 2. `dotnet build harness/RazorBenchmark/RazorBenchmark.sln`
-3. `dotnet run --project harness/RazorBenchmark/RazorBenchmark`
-4. In the app: pick a suite tab → verify corpus (downloader checks SHA-256) →
-   select engines → run → export CSV (standard schema) → reload to review.
-5. Compare your CSV against `docs/benchmarks/suite1-max.csv` to confirm reproduction.
+3. `dotnet run --project harness/RazorBenchmark/RazorBenchmark -- --selftest`
+   (headless checks, no client launched), or without flags for the GUI.
+4. In the app: the **Trial** tab (request/copy template) and **Dashboard**
+   `Export CSV` are wired. Benchmark Run, corpus Verify/Download, engine
+   toggles, and Settings do **not** exist yet — see QUICKSTART for the exact
+   current scope.
+5. Compare shipped CSVs with `--csvcheck docs/benchmarks/suite1-max.csv`
+   (schema + ratio validation) rather than a GUI reload control, which does
+   not exist yet.
 
 Details: [docs/getting-started/QUICKSTART.md](docs/getting-started/QUICKSTART.md),
 [docs/getting-started/INSTALL.md](docs/getting-started/INSTALL.md).
@@ -238,21 +250,25 @@ Details: [docs/getting-started/QUICKSTART.md](docs/getting-started/QUICKSTART.md
 
 - **Supported targets:** Windows x64 (wizard `packaging/windows/razorzip-setup.iss`,
   MSI alternative `packaging/windows/RazorZip.wxs`); Linux x64 Debian/RPM
-  (`packaging/linux/`). The default packages install the **open harness (Core)**;
-  commercial engine binaries are included only in allow-list-gated builds
-  (none in this release — see `artifacts/hardened/README.md`). Architecture
-  support beyond x64 is not claimed.
-- **GUI install:** run the wizard (default `C:\Program Files\MobiSec\RazorZip`,
-  per-user option offered). On the **Request Your 14-Day RazorZip Enterprise
+  (`packaging/linux/`). Packages install the **open harness (Core)**; the only
+  allow-listed commercial binary is `razor-train.exe` (see `artifacts/hardened/README.md`).
+  Architecture support beyond x64 is not claimed. **No installer has been
+  compiled or test-installed in this release** (no Inno/WiX/dpkg toolchains on
+  the staging host) — the wizard/MSI/deb/rpm material is reviewed scaffolding
+  with fail-closed gates, not verified installers.
+- **GUI install (once built):** run the wizard (default `C:\Program Files\MobiSec\RazorZip`,
+  per-user option offered but untested). On the **Request Your 14-Day RazorZip Enterprise
   Trial** page, **Request Trial by Email** opens *your* email app with To,
   Subject, and the full template prefilled (correctly percent-encoded); you
   review and press Send yourself. **Copy Request Template** copies the same
   text as a fallback. The step never blocks installation and never sends
   anything. Silent installs skip this page — use the installed GUI Trial tab
   or CLI afterwards.
-- **In-app:** the harness **Trial** tab has the same **Request 14-Day Trial**
-  button (no license required to see it). Opening the email client is not
-  proof of sending — the app cannot know whether you pressed Send.
+- **In-app:** the harness **Trial** tab has the same trial-request buttons
+  (no license required to see them; interactive click-through not yet
+  test-executed — URI construction is covered by `--selftest`). Opening the
+  email client is not proof of sending — the app cannot know whether you
+  pressed Send.
 - **CLI:** `RazorBenchmark --request-trial` opens the email handler on
   graphical sessions; on headless/SSH systems it prints the recipient, subject,
   and full template with manual instructions (exit 0). If no handler exists it
@@ -279,14 +295,16 @@ Details: [docs/getting-started/QUICKSTART.md](docs/getting-started/QUICKSTART.md
   fail closed without toolchains, and write `dist/` + a build manifest.
   Without an allow-list you get harness-only scaffolding, clearly marked —
   never fake commercial features.
-- **Limitations:** packaging is harness-only until an allow-list authorizes
-  engine binaries; license-loader paths are unverified (see LICENSE-DIRS.md);
-  `razor-watch` systemd integration ships disabled-by-default and only in
-  commercial builds; MSI silent/GPO installs exclude interactive email.
+- **Limitations:** only `razor-train.exe` is allow-listed (bench/watch/decode
+  quarantined — see MANIFEST); the installer scripts have never been compiled
+  or test-installed here; license-loader paths are unverified (see LICENSE-DIRS.md);
+  the `razor-watch` systemd unit is retained disabled-by-default scaffolding for a
+  quarantined binary; MSI silent/GPO installs exclude interactive email by design.
 
 ## 13. Support / contact
 
-- Issues: use this repository's issue tracker for harness/docs/benchmark questions.
+- Issues: use this repository's issue tracker
+  (`https://github.com/mobiseccloud/Razor-Public/issues`) for harness/docs/benchmark questions.
 - Commercial / trial / licensing: `razor@mobisec.cloud` (see [SUPPORT.md](SUPPORT.md)).
 - When reporting a benchmark discrepancy, attach your CSV, the manifest, engine
   versions, host/threads, and the exact command or harness settings.

@@ -4,15 +4,18 @@
 ; - Default build (no defines): installs the OPEN benchmark harness only
 ;   ("Core" features) plus the trial-request workflow. No commercial engine,
 ;   no license keys, no credentials are bundled.
-; - Commercial engine files (razor-bench / razor-watch / razor-train /
-;   sfx-decode + .integrity sidecars) are compiled in ONLY when ALL of the
-;   following hold, enforced by scripts/build-installers.ps1:
+; - Commercial engine files are compiled in ONLY when ALL of the following hold,
+;   enforced by scripts/build-installers.ps1 against the in-tree
+;   approved-binaries.txt (currently: razor-train.exe + sidecar only):
 ;     1. ISCC is invoked with /DCOMMERCIAL, AND
-;     2. an operator-approved approved-binaries.txt allow-list exists AND
-;        explicitly authorizes every commercial artifact, AND
-;     3. each artifact plus its detached .integrity sidecar verifies.
+;     2. every staged commercial artifact is named in approved-binaries.txt, AND
+;     3. each staged hash equals the allow-list hash and the detached
+;        .integrity sidecar digest.
 ;   Without /DCOMMERCIAL the commercial [Files]/[Icons] sections below are
 ;   excluded at compile time. The installer never fabricates binaries.
+;   Quarantined binaries (bench/watch/decode, see artifacts/hardened/MANIFEST.txt)
+;   are NOT referenced here even under /DCOMMERCIAL — ISCC fails closed if a
+;   listed file is absent (no skip flags).
 ; - The trial page NEVER sends email: it opens the user's own email app with
 ;   a prefilled message (or offers copy-to-clipboard). Silent installs skip
 ;   the trial page; use the installed GUI/CLI afterwards.
@@ -23,7 +26,7 @@
 #define AppName "RazorZip"
 #define AppVersion "0.1.0"
 #define AppPublisher "Mobisec Cloud"
-#define AppURL "https://github.com/mobisec-cloud/razor"
+#define AppURL "https://github.com/mobiseccloud/Razor-Public"
 #ifndef HarnessDir
   #define HarnessDir "..\..\staging\harness"
 #endif
@@ -57,8 +60,8 @@ Name: "custom"; Description: "Custom"; Flags: iscustom
 Name: "harness"; Description: "Open benchmark GUI harness (Core)"; Types: full harness custom
 Name: "cli"; Description: "CLI helpers (headless trial-template print)"; Types: full cli custom
 #ifdef COMMERCIAL
-Name: "engine"; Description: "Commercial Razor engine (allow-listed binaries only)"; Types: full custom
-Name: "watcher"; Description: "razor-watch service files (allow-listed only)"; Types: full custom
+Name: "engine"; Description: "Commercial Razor engine (allow-listed binaries only — currently razor-train)"; Types: full custom
+Name: "watcher"; Description: "Watcher service files (reserved for a future allow-listed watcher; installs nothing in this release)"; Types: full custom
 #endif
 
 [Files]
@@ -67,16 +70,11 @@ Source: "{#HarnessDir}\*"; DestDir: "{app}\harness"; Flags: ignoreversion recurs
 ; Trial template source of truth, installed for copy-fallback and manual use.
 Source: "..\..\docs\trial\trial-request-template.txt"; DestDir: "{app}"; Flags: ignoreversion; Components: harness cli
 #ifdef COMMERCIAL
-; Commercial engine artifacts. Compiled in ONLY under /DCOMMERCIAL with a valid
-; allow-list; ISCC fails closed here if a listed file is absent (no skip flags).
-Source: "..\..\artifacts\hardened\razor-bench.exe"; DestDir: "{app}\engine"; Components: engine
-Source: "..\..\artifacts\hardened\razor-bench.exe.integrity"; DestDir: "{app}\engine"; Components: engine
+; Allow-listed commercial payload ONLY (currently: razor-train.exe).
+; Quarantined bench/watch/decode are deliberately NOT referenced.
+; ISCC fails closed here if a listed file is absent (no skip flags).
 Source: "..\..\artifacts\hardened\razor-train.exe"; DestDir: "{app}\engine"; Components: engine
 Source: "..\..\artifacts\hardened\razor-train.exe.integrity"; DestDir: "{app}\engine"; Components: engine
-Source: "..\..\artifacts\hardened\razor-watch.exe"; DestDir: "{app}\engine"; Components: watcher
-Source: "..\..\artifacts\hardened\razor-watch.exe.integrity"; DestDir: "{app}\engine"; Components: watcher
-Source: "..\..\artifacts\hardened\sfx-decode.exe"; DestDir: "{app}\engine"; Components: engine
-Source: "..\..\artifacts\hardened\sfx-decode.exe.integrity"; DestDir: "{app}\engine"; Components: engine
 #endif
 
 [Icons]
@@ -84,7 +82,7 @@ Name: "{group}\Razor Benchmark Harness"; Filename: "{app}\harness\RazorBenchmark
 Name: "{group}\Request 14-Day Trial"; Filename: "{app}\harness\RazorBenchmark.exe"; Parameters: "--request-trial"; Components: harness
 Name: "{commondesktop}\Razor Benchmark"; Filename: "{app}\harness\RazorBenchmark.exe"; Components: harness; Tasks: desktopicon
 #ifdef COMMERCIAL
-Name: "{group}\Razor Engine (commercial)"; Filename: "{app}\engine\razor-bench.exe"; Components: engine
+Name: "{group}\Razor Trainer (commercial)"; Filename: "{app}\engine\razor-train.exe"; Components: engine
 #endif
 
 [Tasks]

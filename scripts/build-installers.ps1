@@ -39,15 +39,29 @@ try {
   Pass 'audit' 'source-leak/secret/history audit passed'
 } catch { Fail 'audit' $_.Exception.Message; Write-Manifest; exit 1 }
 
-# 2. Allow-list gate. The allow-list itself is NEVER committed (audit forbids it);
-# it is supplied out-of-band via -AllowList or RAZOR_ALLOWLIST_PATH.
+# 2. Allow-list gate. Default is the in-tree distribution boundary
+# (approved-binaries.txt, format: filename sha256 version target purpose...);
+# an explicit -AllowList path or RAZOR_ALLOWLIST_PATH overrides it (same format).
+# Entries name exact filenames; hashes are cross-checked before staging.
 $commercialFiles = @()
-if ([string]::IsNullOrWhiteSpace($AllowList) -or -not (Test-Path -LiteralPath $AllowList)) {
-  Skip 'allow-list' 'no approved-binaries.txt supplied (expected: public release ships harness-only). Commercial targets disabled.'
+$allowHash = @{}
+$allowPath = $AllowList
+if ([string]::IsNullOrWhiteSpace($allowPath) -or -not (Test-Path -LiteralPath $allowPath)) {
+  $inTree = Join-Path $RepoRoot 'approved-binaries.txt'
+  if (Test-Path -LiteralPath $inTree) { $allowPath = $inTree }
+}
+if ([string]::IsNullOrWhiteSpace($allowPath) -or -not (Test-Path -LiteralPath $allowPath)) {
+  Skip 'allow-list' 'no allow-list available; commercial targets disabled (fail-closed).'
 } else {
-  $commercialFiles = Get-Content -LiteralPath $AllowList | Where-Object { $_ -match '\S' } | ForEach-Object { $_.Trim() }
+  foreach ($line in (Get-Content -LiteralPath $allowPath)) {
+    if ($line -match '^\s*(#|$)') { continue }
+    $tok = $line -split '\s+'
+    if ($tok.Count -lt 4) { Fail 'allow-list' "malformed allow-list line: $line"; Write-Manifest; exit 1 }
+    $commercialFiles += $tok[0]
+    $allowHash[$tok[0]] = $tok[1]
+  }
   if ($commercialFiles.Count -eq 0) { Fail 'allow-list' 'allow-list empty/ambiguous; STOP'; Write-Manifest; exit 1 }
-  Pass 'allow-list' "$($commercialFiles.Count) explicitly authorized artifact(s)"
+  Pass 'allow-list' "$($commercialFiles.Count) explicitly authorized artifact(s) from $(Split-Path -Leaf $allowPath)"
 }
 
 # 3-4. Stage harness (open, buildable) + verify commercial artifacts if authorized.
@@ -68,6 +82,7 @@ if ($commercialFiles.Count -gt 0) {
     if (-not (Test-Path -LiteralPath $src)) { Fail 'stage-commercial' "authorized artifact missing: $f"; $ok = $false; continue }
     if (-not (Test-Path -LiteralPath $side)) { Fail 'stage-commercial' "missing .integrity sidecar: $f"; $ok = $false; continue }
     $h = (Get-FileHash -LiteralPath $src -Algorithm SHA256).Hash
+    if ($h -ne $allowHash[$f]) { Fail 'stage-commercial' "hash != allow-list for $f"; $ok = $false; continue }
     if (-not ((Get-Content -LiteralPath $side -Raw) -match $h)) { Fail 'stage-commercial' "integrity mismatch: $f"; $ok = $false; continue }
   }
   if (-not $ok) { Write-Manifest; exit 1 }

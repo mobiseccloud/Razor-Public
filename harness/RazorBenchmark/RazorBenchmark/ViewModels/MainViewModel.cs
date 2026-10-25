@@ -26,7 +26,7 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private string _compressedBytes = "-";
     [ObservableProperty] private string _ratio = "-";
     [ObservableProperty] private string _roundTrip = "-";
-    [ObservableProperty] private string _processStatus = "Idle. Pick a suite tab, verify the corpus, select engines, then Run.";
+    [ObservableProperty] private string _processStatus = "Idle. The Trial tab (request/copy template) and Dashboard Export CSV are wired; benchmark Run, corpus download, and engine setup are not implemented yet.";
     [ObservableProperty] private string _engineAvailability = "Probing engines on PATH…";
     [ObservableProperty] private string _trialStatus =
         "No email has been sent. Requesting a trial opens YOUR email app with a prefilled message — you review and send it yourself. Available without a Pro/Enterprise license.";

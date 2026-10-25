@@ -3,13 +3,14 @@ Version:        0.1.0
 Release:        1%{?dist}
 Summary:        RazorZip open benchmark harness (Core features)
 License:        MIT
-URL:            https://github.com/mobisec-cloud/razor
+URL:            https://github.com/mobiseccloud/Razor-Public
 Source0:        %{name}-%{version}.tar.gz
 
-# Commercial engine binaries (razor-bench, razor-watch, razor-train,
-# sfx-decode + .integrity sidecars) are packaged ONLY when the
-# operator-approved allow-list authorizes them (see scripts/build-installers.sh,
-# %%{commercial} conditional below). Default build: harness only, no engine.
+# Commercial payload (currently allow-listed: razor-train.exe + .integrity
+# sidecar only) is packaged ONLY when the in-tree approved-binaries.txt
+# authorizes it (see scripts/build-installers.sh, %%{commercial} conditional
+# below). Quarantined bench/watch/decode are never packaged. Default build:
+# harness only, no engine.
 
 BuildArch:      x86_64
 

@@ -1,6 +1,11 @@
+# QUARANTINED BINARY — razor-watch is NOT allow-listed and no current package
+# installs this unit (spec %if commercial covers engine payloads only when
+# allow-listed). Retained as reviewed scaffolding. Flags below follow the
+# binary's own --print-systemd generator (there is NO --service flag);
+# re-verify against the packaged binary before any future use.
 [Unit]
 Description=Razor watch service (commercial, allow-listed only)
-Documentation=https://github.com/mobisec-cloud/razor
+Documentation=https://github.com/mobiseccloud/Razor-Public
 # Installed ONLY by allow-list-gated commercial packages. This unit is shipped
 # DISABLED: administrators enable/start it explicitly after reviewing service
 # permissions. The package %post never enables or starts it automatically.
@@ -11,10 +16,12 @@ Wants=network-online.target
 Type=simple
 # Run as an unprivileged service account created by the administrator.
 # User=/Group= MUST be set by the deploying organization; the package does not
-# invent privileged identities.
+# invent privileged identities. Config/state paths (/etc/razor, /var/lib/...)
+# are NOT created by any package in this release (see LICENSE-DIRS.md) and
+# licence credentials (RAZOR_LICENSE*) must be supplied by the administrator.
 User=nobody
 Group=nogroup
-ExecStart=/usr/lib/razorzip/engine/razor-watch --service
+ExecStart=/usr/lib/razorzip/engine/razor-watch --config /etc/razor/razor-logd.json --state-file /var/lib/razor-watch/state.json
 Restart=on-failure
 NoNewPrivileges=true
 ProtectSystem=strict

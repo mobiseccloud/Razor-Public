@@ -13,12 +13,13 @@ It is **not** a codec specification and intentionally omits proprietary internal
   (ratio). Tiers are strict subsets for size purposes: larger tiers can only win
   against smaller ones on the same input in the reference configuration.
 
-## Integrity model (what the harness checks)
+## Integrity model (what the benchmark engine checks; the GUI does not run matrices)
 
 1. Per-block checksum failure → block rejected, run marked `RT-FAIL`/`ERROR`
    (never a silent success).
 2. End-to-end digest mismatch → whole output rejected.
 3. Truncated / tampered inputs → controlled, fail-closed rejection.
+   (Observed on staged tooling: corrupt input → exit 1, no output written.)
 
 ## 512 MiB working-set guardrail
 

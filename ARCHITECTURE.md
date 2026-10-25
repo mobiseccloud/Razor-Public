@@ -37,9 +37,17 @@ Rules:
   hash-verify), `EngineRunner` (process spawn, timeout, capture), `EngineCatalog`
   (PATH probing, missing-tool guidance), `BenchmarkService` (matrix orchestration,
   round-trip check, ETA).
-- `ViewModels/` + `Views/` — Dashboard, corpus tabs, engine selection, downloader.
-- No network fetch of engines. Missing third-party tools show official install
-  documentation; any install flow is explicit and user-approved.
+- `ViewModels/` + `Views/` — Dashboard (CSV view/export), Trial tab
+  (request/copy), corpus list, engine availability report. Run, download,
+  engine toggles, and Settings are not wired yet.
+- No network fetch of engines. Missing third-party tools are reported by
+  `--engines` with official install documentation; any install flow is
+  explicit and user-approved.
+- `BenchmarkService` (matrix orchestration), `DownloaderService` (progress,
+  retry, hash-verify), `ManifestService`, `EngineRunner`, and `EngineCatalog`
+  exist as compiled-but-UI-unwired library code: no control invokes them, and
+  the Dashboard progress/ETA/byte fields have no producer. They are covered
+  only by headless `--selftest`/`--csvcheck` paths where applicable.
 
 ## Commercial side (opaque to this repo)
 

@@ -5,6 +5,12 @@ namespace RazorBenchmark.Models;
 /// <summary>
 /// An external engine adapter. Engines are spawned as child processes only;
 /// the harness never links proprietary code.
+/// CompressArgs/DecompressArgs/VersionArgs are aspirational templates — no
+/// substitution engine or version probe consumes them yet (the --engines probe
+/// only checks PATH presence). Do not treat them as executed command lines.
+/// Razor entries carry no VersionArgs: the quarantined razor-bench.exe has no
+/// --version flag (it panics on unknown args), and probing an unverified flag
+/// is forbidden.
 /// </summary>
 public sealed record EngineSpec(
     string Name,
@@ -22,12 +28,12 @@ public static class EngineCatalog
 {
     public static IReadOnlyList<EngineSpec> Defaults() => new[]
     {
-        new EngineSpec("Razor", "Max", "", "{input} -> {output}", "{input} -> {output}", "--version",
-            "Commercial binary — configure path in Settings if installed. No download is performed by the harness."),
-        new EngineSpec("Razor", "MaxFast", "", "{input} -> {output}", "{input} -> {output}", "--version",
-            "Commercial binary — configure path in Settings if installed."),
-        new EngineSpec("Razor", "Fast", "", "{input} -> {output}", "{input} -> {output}", "--version",
-            "Commercial binary — configure path in Settings if installed."),
+        new EngineSpec("Razor", "Max", "", "{input} -> {output}", "{input} -> {output}", "",
+            "Commercial binary — no path configuration UI exists yet; nothing is auto-downloaded."),
+        new EngineSpec("Razor", "MaxFast", "", "{input} -> {output}", "{input} -> {output}", "",
+            "Commercial binary — no path configuration UI exists yet."),
+        new EngineSpec("Razor", "Fast", "", "{input} -> {output}", "{input} -> {output}", "",
+            "Commercial binary — no path configuration UI exists yet."),
         new EngineSpec("brotli", "q11", "brotli", "--quality 11 --input {input} --output {output}", "--decompress --input {input} --output {output}", "--version",
             "https://github.com/google/brotli"),
         new EngineSpec("zstd", "19", "zstd", "-19 -c {input} -o {output}", "-d -c {input} -o {output}", "--version",
