@@ -1,18 +1,24 @@
-# artifacts/hardened — commercial binaries (allow-list gated)
+# artifacts/hardened — approved commercial binaries
 
-**This release intentionally contains NO commercial binaries.**
+**Shipped in this release: `razor-train.exe` only** (plus its detached
+`.integrity` sidecar). Full details: `MANIFEST.txt` (same directory) and
+`approved-binaries.txt` (repo root).
 
-Release policy (§14): binaries are published ONLY when named in an
-operator-provided allow-list (`approved-binaries.txt`) identifying the exact
-approved artifacts. No such allow-list was provided at staging time, so the gate
-held and nothing was copied here.
+| File | Version/build | Platform | Purpose | SHA-256 | Sidecar | Status |
+|---|---|---|---|---|---|---|
+| `razor-train.exe` | bundle-20261024-221249 | windows-x64 | tuning-profile trainer | `5FE23DF5…C138B` (full hash in `MANIFEST.txt`) | `razor-train.exe.integrity` (verified match) | VERIFIED: smoke, functional train run, tamper-negative, string scan |
 
-When an allow-list exists, each listed artifact ships in this directory with:
+**Verify your download:** recompute SHA-256 and compare with `MANIFEST.txt`
+and `approved-binaries.txt`; confirm the `.integrity` sidecar is present.
+The loader refuses to run when the sidecar is missing or mismatched
+(silent exit 1 — verified). A modified executable does not run.
 
-- the approved binary itself,
-- a detached `.integrity` sidecar,
-- recorded SHA-256, version, and build date (see ` integrity` record),
-- smoke-test and tamper-negative results in the release report.
+**Quarantined (NOT shipped):** `razor-bench.exe`, `razor-watch.exe`,
+`sfx-decode` tooling — independent functional gates found deterministic
+round-trip/verify-decode failures on small inputs in this build
+(see `MANIFEST.txt`). They were removed from the allow-list and are not
+distributed. The published benchmark evidence (all files >= ~400B, zero
+RT-FAILs) is unaffected.
 
-Until then: the harness works fully with third-party engines and any locally
-installed Razor binary you configure — it never requires a vendored binary.
+**Nothing else is distributed from this directory.** No source, no PDBs,
+no keys, no licenses, no private configuration.

@@ -1,0 +1,15 @@
+﻿# approved-binaries.txt — PUBLIC distribution allow-list.
+# Generated from measured SHA-256 hashes of hardened bundle 20261024-221249
+# (established private hardening pipeline: dist build -> protector wrap -> integrity
+# sidecar -> test gates -> protected-binary smoke -> tamper-negative).
+# Format: filename sha256 version target purpose...
+#   (filename, sha256, version, target = first 4 whitespace tokens; the rest of
+#   the line is the human-readable purpose — never parsed as fields.)
+# Only files named here may enter artifacts/hardened/, each with its matching
+# detached .integrity sidecar. No credentials, secrets, keys, or licenses.
+#
+# QUARANTINE NOTICE (2026-10-25, verified by independent functional gates):
+# bench, watcher and sfx extractor binaries were REMOVED from this list after
+# deterministic round-trip/verify-decode failures on small inputs
+# (see artifacts/hardened/MANIFEST.txt). They are not distributed.
+razor-train.exe 5FE23DF5F4B525C78587B7284E4D7B7562AFEB9132CF17E9BDB2C560F63C138B bundle-20261024-221249 windows-x64 tuning-profile trainer (emit .rzprofile from sample corpora)

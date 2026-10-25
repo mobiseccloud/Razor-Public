@@ -131,15 +131,24 @@ Build & run: [docs/getting-started/](docs/getting-started/).
 
 ## 7. Commercial binaries
 
-**This release ships no commercial binaries.** No operator-approved
-`approved-binaries.txt` allow-list was provided at staging time, so per release
-policy nothing was copied into `artifacts/hardened/` (see that directory's README).
+**This release ships one verified commercial binary: `razor-train.exe`**
+(tuning-profile trainer, windows-x64, build `bundle-20261024-221249`) with its
+verified detached `.integrity` sidecar — see `artifacts/hardened/README.md`,
+`artifacts/hardened/MANIFEST.txt`, and `approved-binaries.txt` (hashes,
+verification status, quarantine record).
 
-When an allow-list exists for a future release, each listed artifact will ship with:
-SHA-256, recorded version/build date where available, verified detached `.integrity`
-sidecar, smoke test, and tamper-negative test (modified binary rejected; missing
-sidecar rejected). Until then, the harness runs third-party engines and any
-locally installed Razor binary you point it at — it never requires one.
+**Quarantined (tested, NOT shipped):** `razor-bench.exe`, `razor-watch.exe`
+and sfx-decode tooling were removed from the allow-list after independent
+functional gates found deterministic round-trip/verify-decode failures on
+small inputs in this build (fail-closed flags, no false success; realistic
+corpora unaffected — the 62-file Suite-1 evidence still shows zero RT-FAILs).
+Details and re-ship criteria: `artifacts/hardened/MANIFEST.txt`.
+
+Each shipped artifact carries: SHA-256, recorded build identifier, verified
+detached `.integrity` sidecar, smoke test, and tamper-negative test (modified
+binary rejected; missing/corrupt sidecar rejected). The harness otherwise runs
+third-party engines and any locally installed Razor binary you point it at —
+it never requires a vendored binary.
 
 ## 8. Security / protection features
 

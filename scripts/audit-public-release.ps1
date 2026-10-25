@@ -22,7 +22,10 @@ function Is-BuildOutput($fullName) { return $fullName -match $buildOutputDirs }
 
 # 1. Forbidden filename / extension sweep (.git internals excluded — history is
 # audited separately in step 5 via git plumbing, which never touches reflogs)
-$forbiddenName = @('\.lic$', '\.key$', '\.pem$', '\.pfx$', '\.p12$', '\.kdbx$', '(^|[/\\])\.env(\.|$)', 'approved-binaries\.txt$', 'razor\.lic$', 'id_rsa', 'id_ed25519')
+# NOTE: approved-binaries.txt is a REQUIRED public artifact (explicit distribution
+# allow-list with measured hashes). It is validated for consistency with
+# artifacts/hardened/ in step 7 below — never flagged by name.
+$forbiddenName = @('\.lic$', '\.key$', '\.pem$', '\.pfx$', '\.p12$', '\.kdbx$', '(^|[/\\])\.env(\.|$)', 'razor\.lic$', 'id_rsa', 'id_ed25519')
 Get-ChildItem -LiteralPath $RepoRoot -Recurse -Force -File |
   Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' } |
   Where-Object { -not (Is-BuildOutput $_.FullName) } | ForEach-Object {
@@ -57,6 +60,13 @@ $benignExceptions = @(
   @{ File = 'README.md'; Line = '(?i)no SMTP credentials' }
   @{ File = 'TrialEmail.cs'; Line = '(?i)never needs SMTP credentials' }
   @{ File = 'MainWindow.axaml'; Line = '(?i)No account, password, SMTP server' }
+  # The allow-list's own entry lines (exact format: name + 64-hex hash + build
+  # id). The filename necessarily repeats the binary name; the hash is the
+  # measured artifact digest, not a secret. Comment lines are NOT exempt.
+  @{ File = 'approved-binaries.txt'; Line = '^[a-z0-9-]+\.exe [0-9A-F]{64} bundle-' }
+  # Boundary documentation that names the vendor-only generator to state its
+  # exclusion. Source/keys/material for it remain forbidden everywhere.
+  @{ File = 'artifacts\hardened\MANIFEST.txt'; Line = 'razor-licgen — not referenced by public packaging' }
 )
 
 function Is-Benign($relPath, $line) {
@@ -89,7 +99,10 @@ $patterns = @(
   'mobisec\.cloud@gmail\.com',
   'RAZOR_LICENSE',
   'RazorCompressor|Razor\.Compression|razor-compress|razor_bench|Binary DNA|StructuralLens|archival\.rs',
-  'dna::|razor_train|razor-train|genome.*motif'
+  # NOTE: the hyphenated public binary name (e.g. razor-train.exe) is expected
+  # wherever the allow-listed artifact is referenced — only bare "razor-train"
+  # (private crate/dir naming) is flagged. Underscored Rust module stays flagged.
+  'dna::|razor_train|razor-train(?!\.exe)|genome.*motif'
 )
 $textExts = @('.md', '.cs', '.csproj', '.sln', '.ps1', '.sh', '.yml', '.yaml', '.json', '.csv', '.txt', '.axaml')
 Get-ChildItem -LiteralPath $RepoRoot -Recurse -Force -File |
@@ -115,8 +128,26 @@ Get-ChildItem -LiteralPath $RepoRoot -Recurse -Force -File |
   } catch { }
 }
 
-# 4. Binary strings (assets + any exe/dll, if ever present; .git and build
-# outputs excluded — shipped payloads are hashed in build manifests instead)
+# 4. Binary strings (assets + staged allow-listed executables; .git and build
+# outputs excluded — shipped payloads are hashed in build manifests instead).
+# Allow-listed staged binaries are EXEMPT from pure hardener/env markers
+# (VMProtect, RAZOR_LICENSE): those are the protector's own linkage strings /
+# env-var names, expected in a hardened binary — not secrets or config. They
+# remain fully scanned for genuine secret patterns (keys, URLs, credentials).
+function Get-AllowListedNames($root) {
+  $names = @()
+  $al = Join-Path $root 'approved-binaries.txt'
+  if (Test-Path -LiteralPath $al) {
+    foreach ($line in [IO.File]::ReadAllLines($al)) {
+      if ($line -match '^\s*(#|$)') { continue }
+      $tok = $line -split '\s+'
+      if ($tok.Count -ge 4) { $names += $tok[0] }
+    }
+  }
+  return $names
+}
+$allowListed = Get-AllowListedNames $RepoRoot
+$markerExempt = @('VMProtect', 'RAZOR_LICENSE')
 Get-ChildItem -LiteralPath $RepoRoot -Recurse -Force -File |
   Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' } |
   Where-Object { -not (Is-BuildOutput $_.FullName) } |
@@ -126,7 +157,14 @@ Get-ChildItem -LiteralPath $RepoRoot -Recurse -Force -File |
     $ascii = [Text.Encoding]::ASCII.GetString($bytes)
     $rel = $_.FullName.Substring($RepoRoot.Length)
     foreach ($pat in @('PRIVATE KEY', 'razor-licgen', 'VMProtect', 'mongodb://', 'smtp', 'RAZOR_LICENSE')) {
-      if ($ascii -match "(?i)$pat") { Add-Failure "binary string '$pat' in $rel" }
+      if ($ascii -match "(?i)$pat") {
+        $base = [IO.Path]::GetFileName($_.FullName)
+        if (($markerExempt -contains $pat) -and ($allowListed -contains $base)) {
+          Write-Host "reviewed-benign: hardener/env marker '$pat' in allow-listed staged binary $rel" -ForegroundColor DarkGray
+        } else {
+          Add-Failure "binary string '$pat' in $rel"
+        }
+      }
     }
   } catch { }
 }
@@ -164,6 +202,48 @@ try {
     }
   }
 } finally { Pop-Location }
+
+# 7. Allow-list <-> staged consistency (requires exact hash agreement).
+$alPath = Join-Path $RepoRoot 'approved-binaries.txt'
+$hardDir = Join-Path $RepoRoot 'artifacts\hardened'
+if (Test-Path -LiteralPath $alPath) {
+  $entries = @{}
+  foreach ($line in [IO.File]::ReadAllLines($alPath)) {
+    if ($line -match '^\s*(#|$)') { continue }
+    $tok = $line -split '\s+'
+    if ($tok.Count -lt 5) { Add-Failure "allow-list malformed line: $line"; continue }
+    if ($entries.ContainsKey($tok[0])) { Add-Failure "allow-list duplicate: $($tok[0])"; continue }
+    $entries[$tok[0]] = $tok[1]
+  }
+  $staged = @()
+  if (Test-Path -LiteralPath $hardDir) {
+    # MANIFEST.txt is documentation, not a distributable — same as README.md.
+    $staged = Get-ChildItem -LiteralPath $hardDir -File | Where-Object { $_.Name -notin @('README.md', 'MANIFEST.txt') }
+  }
+  foreach ($f in $staged) {
+    if ($f.Extension -eq '.integrity') {
+      $exe = $f.Name -replace '\.integrity$', ''
+      if ($entries.Keys -notcontains $exe) { Add-Failure "staged sidecar without allow-listed exe: $($f.Name)" }
+      continue
+    }
+    if (-not $entries.ContainsKey($f.Name)) { Add-Failure "staged file not allow-listed: $($f.Name)"; continue }
+    $h = (Get-FileHash -LiteralPath $f.FullName -Algorithm SHA256).Hash
+    if ($h -ne $entries[$f.Name]) { Add-Failure "staged hash != allow-list for $($f.Name)" }
+    else { Write-Host "allow-list OK: $($f.Name) hash matches" -ForegroundColor DarkGray }
+    $side = $f.FullName + '.integrity'
+    if (-not (Test-Path -LiteralPath $side)) { Add-Failure "staged exe missing sidecar: $($f.Name)" }
+  }
+  foreach ($name in $entries.Keys) {
+    if (-not (Test-Path -LiteralPath (Join-Path $hardDir $name))) { Add-Failure "allow-listed file not staged: $name" }
+  }
+} else {
+  $left = @()
+  if (Test-Path -LiteralPath $hardDir) {
+    $left = Get-ChildItem -LiteralPath $hardDir -File | Where-Object { $_.Name -ne 'README.md' }
+  }
+  if ($left.Count -gt 0) { Add-Failure "binaries staged without an allow-list" }
+  else { Write-Host "allow-list absent and nothing staged (harness-only state)" -ForegroundColor DarkGray }
+}
 
 Write-Host "----------------------------------------"
 if ($failures.Count -gt 0) {

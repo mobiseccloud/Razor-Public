@@ -1,8 +1,9 @@
 <#
 .SYNOPSIS
-  Post-staging verification: CSV schema, manifests, integrity gate, harness build.
-  Non-zero exit on failure. Tamper/integrity checks SKIP cleanly when no
-  allow-list binaries are present (this release).
+  Post-staging verification: CSV schema, manifests, allow-list/binary/sidecar
+  hash agreement, harness build.
+  Non-zero exit on failure. Integrity checks SKIP cleanly when no
+  allow-list binaries are present.
 #>
 param(
   [string]$RepoRoot = (Split-Path -Parent $PSScriptRoot)
@@ -46,18 +47,31 @@ foreach ($m in @('manifest-suite1.csv', 'manifest-suite2.csv')) {
   if (Test-Path -LiteralPath $p) { Pass "manifest $m present" } else { Fail "manifest $m missing" }
 }
 
-# 3. Commercial binary gate
+# 3. Commercial binary gate (allow-list + staged + sidecar hash agreement)
 $binDir = Join-Path $RepoRoot 'artifacts\hardened'
+$alPath = Join-Path $RepoRoot 'approved-binaries.txt'
+$allowed = @{}
+if (Test-Path -LiteralPath $alPath) {
+  foreach ($line in [IO.File]::ReadAllLines($alPath)) {
+    if ($line -match '^\s*(#|$)') { continue }
+    $tok = $line -split '\s+'
+    if ($tok.Count -ge 4) { $allowed[$tok[0]] = $tok[1] }
+  }
+}
 $binaries = Get-ChildItem -LiteralPath $binDir -File -ErrorAction SilentlyContinue |
-  Where-Object { $_.Extension -notin @('.md') }
+  Where-Object { $_.Extension -notin @('.md', '.txt') -and $_.Extension -ne '.integrity' }
 if (-not $binaries -or $binaries.Count -eq 0) {
-  Skip 'no commercial binaries (no allow-list) — integrity/tamper checks N/A this release'
+  Skip 'no commercial binaries — integrity/tamper checks N/A this release'
 } else {
+  if ($allowed.Count -eq 0) { Fail 'binaries staged without an allow-list' }
   foreach ($b in $binaries) {
+    if (-not $allowed.ContainsKey($b.Name)) { Fail "$($b.Name): staged but not allow-listed"; continue }
+    $h = (Get-FileHash -LiteralPath $b.FullName -Algorithm SHA256).Hash
+    if ($h -ne $allowed[$b.Name]) { Fail "$($b.Name): staged hash != allow-list"; continue }
+    Pass "$($b.Name): staged hash == allow-list"
     $sidecar = "$($b.FullName).integrity"
     if (-not (Test-Path -LiteralPath $sidecar)) { Fail "$($b.Name): missing .integrity sidecar" }
     else {
-      $h = (Get-FileHash -LiteralPath $b.FullName -Algorithm SHA256).Hash
       $s = Get-Content -LiteralPath $sidecar -Raw
       if ($s -match $h) { Pass "$($b.Name): integrity sidecar matches" } else { Fail "$($b.Name): integrity mismatch" }
     }

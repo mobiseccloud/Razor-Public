@@ -1,0 +1,42 @@
+Razor public hardened artifact manifest
+Build: bundle-20261024-221249 (established hardening pipeline: dist build,
+protector wrap, detached integrity sidecars, test gates, protected-binary
+smoke, tamper-negative). Staged: 2026-10-26 (hash re-verified at staging).
+
+SHIPPED (allow-listed in approved-binaries.txt, all gates passed):
+  razor-train.exe  12891136 bytes  windows-x64
+    sha256: 5FE23DF5F4B525C78587B7284E4D7B7562AFEB9132CF17E9BDB2C560F63C138B
+    sidecar: razor-train.exe.integrity (present, hash matches)
+    purpose: tuning-profile trainer; emits .rzprofile from sample corpora
+    gates: no-args usage exit 2 (no crash); functional train run exit 0 with
+      profile emitted; profile consumable by archival tier selection;
+      missing/corrupt sidecar -> exit 1 (no run); string scan clean.
+    note: trainer only analyzes samples and writes a profile; it performs no
+      payload archival round-trip. Small-input archival limitation below does
+      not affect its verified function.
+
+QUARANTINED (tested, FAILED or UNPROVEN — NOT distributed, NOT in allow-list):
+  razor-bench.exe
+    FAIL: deterministic RA-RT-FAIL on small inputs (e.g. 42/63/64/100/200-byte
+    samples incl. uniform-byte runs; 1000/4096-byte and realistic files pass).
+    Realistic corpora unaffected (62-file Suite-1 evidence: zero RT-FAILs),
+    but the byte-for-byte gate requires equality on the tested samples.
+  razor-watch.exe
+    FAIL: small log files fail archival with "verify decode failed: invalid
+    BDNA data: bad block size" (fail-closed warning, exit stays 0).
+    Realistic-size logs archive correctly.
+  razor-sfx-decode.exe
+    UNPROVEN for distribution: negatives all fail-closed correctly (empty /
+    garbage / truncated -> exit 1, no output) and one realistic 130680-byte
+    archive decoded byte-identical, but no in-scope payload producer exists
+    in this release to verify the small-input shape, and it shares the
+    archival framing with the confirmed encoder defect above.
+  Common root-cause area: small-input archival encode/framing in this build
+  (bundle-20261024-221249). Published benchmark evidence (all files >= ~400B)
+  is unaffected. A fixed build must re-pass the full gate battery before any
+  of these binaries ship.
+
+EXCLUDED BY DESIGN (never candidates for this release):
+  razor-sfx-make.exe / razor-sfx-stub.exe / razorzip.exe (Tauri GUI) /
+  managed/*.dll / *.pdb / razor-licgen — not referenced by public packaging,
+  or hardening unverified, or vendor-only. See release report.
