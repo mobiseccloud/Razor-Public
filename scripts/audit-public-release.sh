@@ -10,20 +10,21 @@ fail() { echo "FAIL: $1"; FAIL=$((FAIL+1)); }
 echo "=== audit-public-release (sh) ==="
 echo "Root: $ROOT"
 
-# 1. Forbidden filenames + proprietary extensions
-forbidden="$(find "$ROOT" -type f \( -name '*.lic' -o -name '*.key' -o -name '*.pem' \
+# 1. Forbidden filenames + proprietary extensions (.git internals excluded —
+# history is audited separately in step 4 via git plumbing)
+forbidden="$(find "$ROOT" -type f ! -path "$ROOT/.git/*" \( -name '*.lic' -o -name '*.key' -o -name '*.pem' \
   -o -name '*.pfx' -o -name '*.p12' -o -name '.env' -o -name '.env.*' \
   -o -name 'approved-binaries.txt' -o -name 'razor.lic' \) 2>/dev/null)"
 if [ -n "$forbidden" ]; then echo "$forbidden" | while read -r f; do fail "forbidden filename: $f"; done; FAIL=$((FAIL+1)); fi
 
-rs_files="$(find "$ROOT" -type f -name '*.rs' 2>/dev/null)"
+rs_files="$(find "$ROOT" -type f ! -path "$ROOT/.git/*" -name '*.rs' 2>/dev/null)"
 if [ -n "$rs_files" ]; then echo "$rs_files" | while read -r f; do echo "FAIL: proprietary Rust source: $f"; done; FAIL=$((FAIL+1)); fi
 
-pdb_files="$(find "$ROOT" -type f -name '*.pdb' 2>/dev/null)"
+pdb_files="$(find "$ROOT" -type f ! -path "$ROOT/.git/*" -name '*.pdb' 2>/dev/null)"
 if [ -n "$pdb_files" ]; then echo "$pdb_files" | while read -r f; do echo "FAIL: PDB artifact: $f"; done; FAIL=$((FAIL+1)); fi
 
 # 2. Source allow-list (code outside harness/scripts/.github => STOP)
-bad_src="$(find "$ROOT" -type f \( -name '*.cs' -o -name '*.csproj' -o -name '*.sln' \
+bad_src="$(find "$ROOT" -type f ! -path "$ROOT/.git/*" \( -name '*.cs' -o -name '*.csproj' -o -name '*.sln' \
   -o -name '*.rs' -o -name '*.py' -o -name '*.go' -o -name '*.java' \) \
   ! -path "$ROOT/harness/*" ! -path "$ROOT/scripts/*" ! -path "$ROOT/.github/*" 2>/dev/null)"
 if [ -n "$bad_src" ]; then echo "$bad_src" | while read -r f; do echo "FAIL: unexpected source outside allow-list: $f"; done; FAIL=$((FAIL+1)); fi

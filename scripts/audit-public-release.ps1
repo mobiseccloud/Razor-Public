@@ -15,9 +15,11 @@ function Add-Failure($msg) { $script:failures += $msg; Write-Host "FAIL: $msg" -
 Write-Host "=== audit-public-release (powershell) ==="
 Write-Host "Root: $RepoRoot"
 
-# 1. Forbidden filename / extension sweep
+# 1. Forbidden filename / extension sweep (.git internals excluded — history is
+# audited separately in step 5 via git plumbing, which never touches reflogs)
 $forbiddenName = @('\.lic$', '\.key$', '\.pem$', '\.pfx$', '\.p12$', '\.kdbx$', '(^|[/\\])\.env(\.|$)', 'approved-binaries\.txt$', 'razor\.lic$', 'id_rsa', 'id_ed25519')
-Get-ChildItem -LiteralPath $RepoRoot -Recurse -Force -File | ForEach-Object {
+Get-ChildItem -LiteralPath $RepoRoot -Recurse -Force -File |
+  Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' } | ForEach-Object {
   $rel = $_.FullName.Substring($RepoRoot.Length)
   foreach ($pat in $forbiddenName) {
     if ($rel -match $pat) { Add-Failure "forbidden filename: $rel (pattern $pat)" }
@@ -29,6 +31,7 @@ Get-ChildItem -LiteralPath $RepoRoot -Recurse -Force -File | ForEach-Object {
 # 2. Source allow-list: only harness/*.cs|csproj|sln, scripts/*, .github/*, docs/config/markdown/csv allowed as code
 $allowedCode = @('^\\harness\\.*\.(cs|csproj|sln|axaml|axaml\.cs|resx|json)$', '^\\scripts\\.*$', '^\\.github\\.*$', '^\\.*\.md$', '^\\.*\.csv$', '^\\LICENSE$', '^\\.gitignore$')
 Get-ChildItem -LiteralPath $RepoRoot -Recurse -Force -File |
+  Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' } |
   Where-Object { $_.Extension -match '^\.(cs|csproj|sln|rs|ps1|sh|yml|yaml|toml|go|java|py)$' } | ForEach-Object {
   $rel = $_.FullName.Substring($RepoRoot.Length)
   $ok = $false
@@ -80,6 +83,7 @@ $patterns = @(
 )
 $textExts = @('.md', '.cs', '.csproj', '.sln', '.ps1', '.sh', '.yml', '.yaml', '.json', '.csv', '.txt', '.axaml')
 Get-ChildItem -LiteralPath $RepoRoot -Recurse -Force -File |
+  Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' } |
   Where-Object { $textExts -contains $_.Extension -or $_.Extension -eq '' } |
   Where-Object { $_.FullName -notmatch 'scripts[\\/]audit-public-release\.(ps1|sh)$' } | ForEach-Object {
   try {
@@ -100,8 +104,9 @@ Get-ChildItem -LiteralPath $RepoRoot -Recurse -Force -File |
   } catch { }
 }
 
-# 4. Binary strings (assets + any exe/dll, if ever present)
+# 4. Binary strings (assets + any exe/dll, if ever present; .git excluded)
 Get-ChildItem -LiteralPath $RepoRoot -Recurse -Force -File |
+  Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' } |
   Where-Object { $_.Extension -match '^\.(exe|dll|so|dylib|bin|jpeg|jpg|png)$' } | ForEach-Object {
   try {
     $bytes = [IO.File]::ReadAllBytes($_.FullName)
