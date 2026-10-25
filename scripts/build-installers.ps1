@@ -65,12 +65,21 @@ if ([string]::IsNullOrWhiteSpace($allowPath) -or -not (Test-Path -LiteralPath $a
 }
 
 # 3-4. Stage harness (open, buildable) + verify commercial artifacts if authorized.
+# Staging dirs are wiped first: dotnet publish merges into the output dir, so a
+# reused staging tree would ship stale binaries from other RIDs (observed:
+# win-x64 apphost + coreclr.dll leaking into a linux-x64 payload and breaking
+# the runtime load). Never package a dirty staging tree.
 try {
+  $harnessStage = Join-Path $staging 'harness'
+  if (Test-Path -LiteralPath $harnessStage) { Remove-Item -Recurse -Force $harnessStage }
   dotnet publish (Join-Path $RepoRoot 'harness\RazorBenchmark\RazorBenchmark\RazorBenchmark.csproj') `
-    -c Release -r win-x64 --self-contained -o (Join-Path $staging 'harness') --nologo 2>&1 | Select-Object -Last 3
+    -c Release -r win-x64 --self-contained -o $harnessStage --nologo 2>&1 | Select-Object -Last 3
   if ($LASTEXITCODE -ne 0) { Fail 'stage-harness' 'dotnet publish failed'; Write-Manifest; exit 1 }
-  Copy-Item (Join-Path $RepoRoot 'docs\trial\trial-request-template.txt') (Join-Path $staging 'harness') -Force
-  Pass 'stage-harness' 'harness published (win-x64 self-contained) + template staged'
+  # No debug symbols or foreign-RID apphosts in shipped payloads.
+  Get-ChildItem -LiteralPath $harnessStage -Recurse -File -Include '*.pdb' | Remove-Item -Force
+  if (Test-Path -LiteralPath (Join-Path $harnessStage 'RazorBenchmark.exe')) { Write-Host "win-x64 apphost present (expected)" -ForegroundColor DarkGray }
+  Copy-Item (Join-Path $RepoRoot 'docs\trial\trial-request-template.txt') $harnessStage -Force
+  Pass 'stage-harness' 'harness published (win-x64 self-contained, staging wiped first) + template staged'
 } catch { Fail 'stage-harness' $_.Exception.Message; Write-Manifest; exit 1 }
 
 $commercialOk = $false

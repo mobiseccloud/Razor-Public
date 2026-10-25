@@ -3,6 +3,7 @@ Version: 0.1.0
 Section: utils
 Priority: optional
 Architecture: amd64
+Depends: libicu72 | libicu74 | libicu76 | libicu78
 Maintainer: Mobisec Cloud <razor@mobisec.cloud>
 Description: RazorZip open benchmark harness (Core features)
  The open-source benchmark GUI + CLI helpers for the Razor structural

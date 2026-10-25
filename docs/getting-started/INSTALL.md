@@ -32,19 +32,35 @@ payload fragments were never generated and it was never compilable.
 
 ### Debian
 
-1. `sh scripts/build-installers.sh` (needs `dpkg-deb`, else SKIPPED recorded).
+1. `sh scripts/build-installers.sh` (needs `dpkg-deb`, else SKIPPED recorded),
+   or replicate `dist/` assembly on a Linux host with the staged payload.
 2. `sudo dpkg -i dist/razorzip-harness-0.1.0-amd64.deb`.
 3. Files: `/usr/lib/razorzip/harness/`, link `/usr/bin/razor-benchmark`,
    desktop entry `razorzip-trial.desktop`, docs under
    `/usr/share/doc/razorzip/`. `postinst` only refreshes the desktop database —
    no email, no license creation, no service contact.
+   The package depends on ICU (`libicu72|74|76|78` alternation) because the
+   .NET runtime aborts without it (verified on Ubuntu 26.04/WSL: `libicu78`).
+4. Validated 2026-10-26 on Ubuntu 26.04 (WSL guest, not a clean machine):
+   `dpkg -i` installs, postinst runs, `--selftest` passes from
+   `/usr/bin/razor-benchmark`, desktop/docs files present, `dpkg -r` removes
+   everything cleanly. See `dist/build-manifest-linux.json` for hashes.
+   Staging `bin/`/`obj` leftovers and PDBs are stripped before packing, and
+   CRLF is normalized to LF (build script does both).
 
 ### RPM
 
-- Spec: `packaging/linux/rpm/razor-enterprise.spec`. `rpmbuild` wiring for
-  SOURCES/payload is manual in this release (recorded as such by the script).
+- Spec: `packaging/linux/rpm/razor-enterprise.spec`. Validated 2026-10-26:
+  `rpmbuild -bb` succeeds (rpmbuild 6; the legacy `Description:` header tag
+  was removed — RPM 6 rejects it — with the text moved to `%description`).
+  Install/erase verified on Ubuntu 26.04/WSL with `--nodeps` (rpmdb cannot see
+  apt-provided libs there; `Requires: (libicu or icu-libs)` is declared for
+  real RPM distros). See `dist/build-manifest-linux.json`.
 - The `razor-watch.service` unit ships **disabled** and is never enabled or
-  started by `%post`; administrators opt in explicitly.
+  started by `%post`; administrators opt in explicitly. NOTE: the unit's
+  `ExecStart` was corrected (the packaged `--service` flag does not exist;
+  see the unit header), but the watcher binary itself remains quarantined —
+  do not enable this unit with any current build.
 
 ## CLI after any install
 

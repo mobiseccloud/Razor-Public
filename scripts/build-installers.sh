@@ -55,14 +55,19 @@ else
   rec "allow-list" "PASS" "authorized artifacts listed in $ALLOW_LIST"
 fi
 
-# 3. Stage harness (open, buildable).
+# 3. Stage harness (open, buildable). The staging dir is wiped first: dotnet
+# publish merges into the output dir, so a reused tree would ship stale files
+# from other RIDs (observed: win-x64 apphost + coreclr.dll leaking into a
+# linux-x64 payload and breaking the runtime load). PDBs never ship.
+if [ -d "$STAGE/harness" ]; then rm -rf "$STAGE/harness"; fi
 if ! dotnet publish "$ROOT/harness/RazorBenchmark/RazorBenchmark/RazorBenchmark.csproj" \
   -c Release -r linux-x64 --self-contained -o "$STAGE/harness" --nologo >/dev/null 2>&1; then
   rec "stage-harness" "FAIL" "dotnet publish (linux-x64) failed"; write_manifest; exit 1
 fi
+find "$STAGE/harness" -name '*.pdb' -delete
 cp "$ROOT/docs/trial/trial-request-template.txt" "$STAGE/harness/"
 cp "$ROOT/packaging/shared/trial-mailto.txt" "$STAGE/harness/"
-rec "stage-harness" "PASS" "harness published (linux-x64 self-contained) + template staged"
+rec "stage-harness" "PASS" "harness published (linux-x64 self-contained, staging wiped first, PDBs stripped) + template staged"
 
 # 4. Commercial staging only when authorized (name+hash from parsed allow-list).
 if [ ! -s "$ALLOW_TMP" ]; then
@@ -108,8 +113,11 @@ else
   mkdir -p "$PKG/usr/lib/razorzip" "$PKG/usr/bin" "$PKG/usr/share/applications" "$PKG/usr/share/doc/razorzip"
   cp -a "$STAGE/harness" "$PKG/usr/lib/razorzip/"
   ln -sf /usr/lib/razorzip/harness/RazorBenchmark "$PKG/usr/bin/razor-benchmark"
-  cp "$ROOT/packaging/linux/deb/razorzip/usr/share/applications/razorzip-trial.desktop" "$PKG/usr/share/applications/"
-  cp "$ROOT/docs/trial/trial-request-template.txt" "$PKG/usr/share/doc/razorzip/"
+  # CRLF normalization: Windows checkouts carry CRLF; maintainer scripts and
+  # the desktop entry must be LF-only (bad-interpreter / parse failures).
+  sed 's/\r$//' "$ROOT/packaging/linux/deb/razorzip/usr/share/applications/razorzip-trial.desktop" > "$PKG/usr/share/applications/razorzip-trial.desktop"
+  sed 's/\r$//' "$ROOT/docs/trial/trial-request-template.txt" > "$PKG/usr/share/doc/razorzip/trial-request-template.txt"
+  sed -i 's/\r$//' "$PKG/DEBIAN"/postinst "$PKG/DEBIAN"/prerm "$PKG/DEBIAN"/postrm "$PKG/DEBIAN"/control
   if [ "$COMMERCIAL_OK" = true ]; then
     # Allow-listed engine payload (hash-verified in step 4).
     mkdir -p "$PKG/usr/lib/razorzip/engine"
@@ -118,10 +126,17 @@ else
       cp -a "$STAGE/commercial/$f" "$STAGE/commercial/$f.integrity" "$PKG/usr/lib/razorzip/engine/"
     done < "$ALLOW_TMP"
   fi
+  chmod -R go-w "$PKG"
+  chmod 755 "$PKG/DEBIAN"
   chmod 755 "$PKG/DEBIAN/postinst" "$PKG/DEBIAN/prerm" "$PKG/DEBIAN/postrm"
-  # No broad permissions: program files root-owned 755/644 via dpkg defaults.
+  chmod 755 "$PKG/usr/lib/razorzip/harness/RazorBenchmark"
+  find "$PKG/usr" -type f ! -name RazorBenchmark -exec chmod 644 {} +
+  find "$PKG/usr" -type d -exec chmod 755 {} +
+  find "$PKG/usr" -name '*.pdb' -delete
+  # No broad permissions: program files root-owned 755/644 via explicit chmod
+  # (Windows checkouts carry no mode bits; dpkg-deb rejects bad DEBIAN modes).
   if dpkg-deb --build "$PKG" "$DIST/razorzip-harness-0.1.0-amd64.deb" >/dev/null 2>&1; then
-    rec "debian-package" "PASS" "dist/razorzip-harness-0.1.0-amd64.deb built (harness-only)"
+    rec "debian-package" "PASS" "dist/razorzip-harness-0.1.0-amd64.deb built"
     debhash="$(sha256sum "$DIST/razorzip-harness-0.1.0-amd64.deb" | cut -d' ' -f1)"
     rec "artifact" "INFO" "razorzip-harness-0.1.0-amd64.deb sha256=$debhash"
   else
@@ -129,11 +144,26 @@ else
   fi
 fi
 
-# 7. RPM package.
+# 7. RPM package (real build when rpmbuild exists; SOURCES layout per spec).
 if ! command -v rpmbuild >/dev/null 2>&1; then
   rec "rpm-package" "SKIPPED" "rpmbuild absent. Spec present: packaging/linux/rpm/razor-enterprise.spec"
 else
-  rec "rpm-package" "SKIPPED" "rpmbuild present but SOURCES/payload wiring is manual in this release; see spec header"
+  RB="$STAGE/rpmbuild"
+  rm -rf "$RB"; mkdir -p "$RB/SOURCES/payload" "$RB/SPECS" "$RB/BUILD" "$RB/RPMS" "$RB/SRPMS"
+  cp -a "$STAGE/harness" "$RB/SOURCES/payload/harness"
+  cp "$ROOT/packaging/linux/deb/razorzip/usr/share/applications/razorzip-trial.desktop" "$RB/SOURCES/payload/"
+  cp "$ROOT/docs/trial/trial-request-template.txt" "$RB/SOURCES/payload/"
+  cp "$ROOT/packaging/linux/rpm/razor-watch.service" "$RB/SOURCES/payload/"
+  cp "$ROOT/packaging/linux/rpm/razor-enterprise.spec" "$RB/SPECS/"
+  (cd "$RB/SOURCES/payload" && tar czf "$RB/SOURCES/razorzip-harness-0.1.0.tar.gz" .)
+  if rpmbuild -bb --define "_topdir $RB" "$RB/SPECS/razor-enterprise.spec" >/dev/null 2>&1; then
+    mkdir -p "$DIST"
+    find "$RB/RPMS" -name '*.rpm' -exec cp {} "$DIST/" \;
+    rpmhash="$(sha256sum "$DIST"/razorzip-harness-*.rpm | head -1 | cut -d' ' -f1)"
+    rec "rpm-package" "PASS" "RPM built into dist/ (sha256=$rpmhash)"
+  else
+    rec "rpm-package" "FAIL" "rpmbuild failed"
+  fi
 fi
 
 # 8. Manifest + exit code (SKIPPED is not failure; FAIL is).

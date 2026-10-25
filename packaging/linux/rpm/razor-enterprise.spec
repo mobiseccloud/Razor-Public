@@ -14,13 +14,16 @@ Source0:        %{name}-%{version}.tar.gz
 
 BuildArch:      x86_64
 
-Description:
+# ICU is dlopened by the .NET runtime, invisible to rpm auto-deps (verified:
+# clean guest aborts without it). Rich-dep covers the common provider names;
+# adjust per target distro (Ubuntu 26.04: libicu78; Fedora: icu-libs).
+Requires: (libicu or icu-libs)
+
+%description
 The open-source benchmark GUI + CLI helpers for the Razor structural
 compression engine. No commercial binaries, keys, or credentials included.
 Trial requests open the user's own email app, prefilled; nothing is sent
 automatically.
-
-%description
 
 %prep
 
