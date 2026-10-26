@@ -5,8 +5,8 @@
 ### Wizard (Inno Setup, recommended for interactive installs)
 
 1. Build or obtain the setup exe (harness-only unless allow-list-gated):
-   `powershell ./scripts/build-installers.ps1` (needs Inno Setup 6 `iscc.exe`
-   on PATH, else the target records SKIPPED with the reason).
+   `powershell ./scripts/build-installers.ps1` (needs Inno Setup 6 or later
+   `iscc.exe` on PATH, else the target records SKIPPED with the reason).
 2. Run `dist/RazorZip-*-setup.exe`. Default location
    `C:\Program Files\MobiSec\RazorZip`; the privileges dialog offers a
    per-user installation.

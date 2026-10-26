@@ -36,7 +36,7 @@ rec "audit" "PASS" "source-leak/secret/history audit passed"
 # --allow-list=/path or RAZOR_ALLOWLIST_PATH overrides it (same format).
 # Hashes are cross-checked before staging; malformed lines fail closed.
 COMMERCIAL_OK=false
-ALLOW_TMP="$(mktemp)"; trap 'rm -f "$ALLOW_TMP" "$tmp_staged" 2>/dev/null' EXIT
+ALLOW_TMP="$(mktemp)"; trap 'rm -f "$ALLOW_TMP" 2>/dev/null' EXIT
 if [ -z "$ALLOW_LIST" ] || [ ! -f "$ALLOW_LIST" ]; then
   if [ -f "$ROOT/approved-binaries.txt" ]; then ALLOW_LIST="$ROOT/approved-binaries.txt"; fi
 fi
@@ -46,7 +46,16 @@ else
   while IFS= read -r line; do
     case "$line" in \#*|"") continue;; esac
     n="$(printf '%s' "$line" | awk '{print $1}')"; h="$(printf '%s' "$line" | awk '{print $2}')"
-    case "$n$h" in ""*|*" "* ) rec "allow-list" "FAIL" "malformed allow-list line"; write_manifest; exit 1;; esac
+    # Fail closed on malformed lines: name/hash must be present single tokens
+    # and the hash must be a 64-hex SHA-256 (never silently accept garbage).
+    # NOTE: do NOT write this as `case "$n$h" in ""*|...` — the `""*`
+    # alternative matches every string and would reject the whole allow-list.
+    bad=0
+    case "$n" in ""|*" "*) bad=1;; esac
+    case "$h" in ""|*" "*) bad=1;; esac
+    if [ "${#h}" -ne 64 ]; then bad=1; fi
+    case "$h" in *[!0-9A-Fa-f]*) bad=1;; esac
+    if [ "$bad" -ne 0 ]; then rec "allow-list" "FAIL" "malformed allow-list line"; write_manifest; exit 1; fi
     printf '%s %s\n' "$n" "$h" >> "$ALLOW_TMP"
   done < "$ALLOW_LIST"
   if ! grep -q '[^[:space:]]' "$ALLOW_TMP"; then

@@ -38,7 +38,7 @@ AppVersion={#AppVersion}
 AppPublisher={#AppPublisher}
 AppPublisherURL={#AppURL}
 AppSupportURL={#AppURL}
-DefaultDirName={pf}\MobiSec\RazorZip
+DefaultDirName={commonpf}\MobiSec\RazorZip
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 ; Per-user installs are supported via the privileges dialog above.

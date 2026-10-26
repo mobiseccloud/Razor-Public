@@ -76,8 +76,19 @@ try {
     -c Release -r win-x64 --self-contained -o $harnessStage --nologo 2>&1 | Select-Object -Last 3
   if ($LASTEXITCODE -ne 0) { Fail 'stage-harness' 'dotnet publish failed'; Write-Manifest; exit 1 }
   # No debug symbols or foreign-RID apphosts in shipped payloads.
-  Get-ChildItem -LiteralPath $harnessStage -Recurse -File -Include '*.pdb' | Remove-Item -Force
-  if (Test-Path -LiteralPath (Join-Path $harnessStage 'RazorBenchmark.exe')) { Write-Host "win-x64 apphost present (expected)" -ForegroundColor DarkGray }
+  # NOTE: do NOT use -Include here. In Windows PowerShell 5.1,
+  # Get-ChildItem -LiteralPath <dir> -Recurse -Include <pat> silently IGNORES
+  # the pattern and returns EVERY file (observed: 220/220 matched '*.pdb'),
+  # so piping it to Remove-Item guts the staging tree. Where-Object is exact.
+  Get-ChildItem -LiteralPath $harnessStage -Recurse -File |
+    Where-Object { $_.Extension -eq '.pdb' } | Remove-Item -Force
+  # Fail closed on hollow staging: the apphost MUST exist after publish.
+  # (An empty staging dir would otherwise compile into a setup exe that
+  # installs no working harness — observed once, never ship that silently.)
+  if (-not (Test-Path -LiteralPath (Join-Path $harnessStage 'RazorBenchmark.exe'))) {
+    Fail 'stage-harness' 'apphost missing after publish (fail-closed: refusing hollow staging)'; Write-Manifest; exit 1
+  }
+  Write-Host "win-x64 apphost present (expected)" -ForegroundColor DarkGray
   Copy-Item (Join-Path $RepoRoot 'docs\trial\trial-request-template.txt') $harnessStage -Force
   Pass 'stage-harness' 'harness published (win-x64 self-contained, staging wiped first) + template staged'
 } catch { Fail 'stage-harness' $_.Exception.Message; Write-Manifest; exit 1 }
@@ -107,13 +118,19 @@ if ($commercialFiles.Count -gt 0) {
 }
 
 # 5. Inno Setup build (Windows).
+# NOTE: $ErrorActionPreference is 'Stop', so ANY stderr text from iscc.exe
+# (e.g. an Inno deprecation warning) would otherwise terminate the script
+# here WITHOUT writing the manifest. The try/catch keeps the pipeline
+# fail-closed AND evidenced: a compiler problem is recorded, not silent.
 $iscc = Get-Command iscc.exe -ErrorAction SilentlyContinue
-if (-not $iscc) { Skip 'inno-setup' 'iscc.exe not on PATH (install Inno Setup 6). Scaffolding present: packaging/windows/razorzip-setup.iss' }
+if (-not $iscc) { Skip 'inno-setup' 'iscc.exe not on PATH (install Inno Setup 6 or later). Scaffolding present: packaging/windows/razorzip-setup.iss' }
 else {
   $issArgs = @((Join-Path $RepoRoot 'packaging\windows\razorzip-setup.iss'), ('/DHarnessDir=' + (Join-Path $staging 'harness')))
   if ($commercialOk) { $issArgs += '/DCOMMERCIAL' }
-  & $iscc.Path @issArgs 2>&1 | Select-Object -Last 5
-  if ($LASTEXITCODE -ne 0) { Fail 'inno-setup' 'iscc failed' } else { Pass 'inno-setup' 'setup exe built into dist/' }
+  try {
+    & $iscc.Path @issArgs 2>&1 | Select-Object -Last 5
+    if ($LASTEXITCODE -ne 0) { Fail 'inno-setup' 'iscc failed' } else { Pass 'inno-setup' 'setup exe built into dist/' }
+  } catch { Fail 'inno-setup' ("iscc error: " + $_.Exception.Message); Write-Manifest; exit 1 }
 }
 
 # 6. WiX MSI: REMOVED as a deliverable (Windows delivery is Inno Setup only).

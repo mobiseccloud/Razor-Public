@@ -67,6 +67,13 @@ $benignExceptions = @(
   # Boundary documentation that names the vendor-only generator to state its
   # exclusion. Source/keys/material for it remain forbidden everywhere.
   @{ File = 'artifacts\hardened\MANIFEST.txt'; Line = 'razor-licgen — not referenced by public packaging' }
+  # Service unit documents that licence credentials are operator-supplied env
+  # (no values). Narrowly benign; the scanner still flags any credential value.
+  @{ File = 'razor-watch.service'; Line = 'licence credentials \(RAZOR_LICENSE' }
+  # Prose mention of the public binary basename in installer docs.
+  @{ File = 'razorzip-setup.iss'; Line = 'currently razor-train\)' }
+  # .gitignore prohibition comment (the path itself is never committed).
+  @{ File = '.gitignore'; Line = '^C:\\Temp$' }
 )
 
 function Is-Benign($relPath, $line) {
@@ -99,16 +106,24 @@ $patterns = @(
   'mobisec\.cloud@gmail\.com',
   'RAZOR_LICENSE',
   'RazorCompressor|Razor\.Compression|razor-compress|razor_bench|Binary DNA|StructuralLens|archival\.rs',
-  # NOTE: the hyphenated public binary name (e.g. razor-train.exe) is expected
-  # wherever the allow-listed artifact is referenced — only bare "razor-train"
-  # (private crate/dir naming) is flagged. Underscored Rust module stays flagged.
+  # NOTE: the hyphenated public binary filename (razor-train.exe, incl. the
+  # .integrity sidecar) is expected wherever the allow-listed artifact is
+  # referenced, so only bare "razor-train" (private crate/dir naming, e.g.
+  # Rust/razor-train) is flagged. Underscored Rust module form is always flagged.
   'dna::|razor_train|razor-train(?!\.exe)|genome.*motif'
 )
-$textExts = @('.md', '.cs', '.csproj', '.sln', '.ps1', '.sh', '.yml', '.yaml', '.json', '.csv', '.txt', '.axaml')
+$textExts = @('.md', '.cs', '.csproj', '.sln', '.ps1', '.sh', '.yml', '.yaml', '.json', '.csv', '.txt', '.axaml', '.iss', '.spec', '.service', '.desktop')
+# NOTE: .NET reports dotfiles (e.g. .gitignore) as extensionless-or-self, which
+# would silently skip them below. The Is-TextFile check covers them explicitly.
+function Is-TextFile($f) {
+  if ($textExts -contains $f.Extension) { return $true }
+  if ($f.Extension -eq '' -or $f.Extension -eq $f.Name) { return $true }
+  return $false
+}
 Get-ChildItem -LiteralPath $RepoRoot -Recurse -Force -File |
   Where-Object { $_.FullName -notmatch '[\\/]\.git[\\/]' } |
   Where-Object { -not (Is-BuildOutput $_.FullName) } |
-  Where-Object { $textExts -contains $_.Extension -or $_.Extension -eq '' } |
+  Where-Object { Is-TextFile $_ } |
   Where-Object { $_.FullName -notmatch 'scripts[\\/]audit-public-release\.(ps1|sh)$' } | ForEach-Object {
   try {
     $lines = [IO.File]::ReadAllLines($_.FullName)

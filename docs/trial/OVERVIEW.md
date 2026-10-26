@@ -7,8 +7,9 @@ this repo.
 ## Request paths (all open, all manual-send)
 
 - **Installer wizard** (`packaging/windows/razorzip-setup.iss`, trial page —
-  source reviewed, installer itself not yet compiled): Request Trial by Email /
-  Copy Request Template. Skipped in silent installs.
+  source reviewed; installer compiled 2026-10-26 and install/uninstall-tested
+  on a dev host): Request Trial by Email / Copy Request Template. Skipped in
+  silent installs.
 - **Harness GUI** (Trial tab buttons — wired; interactive click-through not
   yet test-executed): Request 14-Day Trial / Copy Request Template.
 - **CLI**: `RazorBenchmark --request-trial` (graphical) with printed fallback
@@ -27,8 +28,9 @@ No SMTP credentials, API keys, accounts, or private endpoints are involved.
 
 ```
 Intended private fulfilment (DESIGN, not an existing service — fulfilment is
-currently manual review; no automatic issuance, mailbox polling, or delivery
-automation exists in this release):
+currently manual review; a private intake/validation service exists
+deploy-ready but undeployed, and no automatic issuance exists in this
+release):
 
 USER (structured email, template in REQUEST-TEMPLATE.md)
   │

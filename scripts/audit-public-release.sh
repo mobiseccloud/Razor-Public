@@ -57,15 +57,30 @@ hits="$(printf '%s\n' "$raw_hits" | grep -v -e 'licensing service (razor-licgen'
   -e 'committed — enforced'   -e 'workflows contain no secrets' -e 'No signing keys,' -e 'issued licenses, SMTP' \
   -e 'razor-licgen., signing keys' -e 'no SMTP credentials' -e 'never needs SMTP' \
   -e 'No account, password, SMTP server' -e 'No SMTP credentials, API keys, accounts' \
-  -e 'not referenced by public packaging' || true)"
+  -e 'not referenced by public packaging' -e 'currently razor-train)' \
+  -e 'licence credentials (RAZOR_LICENSE' || true)"
+# Prohibition comment in .gitignore (the path itself is never committed).
+hits="$(printf '%s\n' "$hits" | grep -v -e '\.gitignore:C:\\Temp$' || true)"
 # Allow-list entry lines (name + 64-hex hash + build id) are reviewed-benign.
 hits="$(printf '%s\n' "$hits" | grep -v -e '\.exe [0-9A-F]\{64\} bundle-' || true)"
 # Bare hyphenated crate/dir name (not the public whatever.exe filename).
-bare_hits="$(grep -rEI --exclude-dir=.git --exclude-dir=bin --exclude-dir=obj \
+# Runs through the same reviewed-benign filters as hits: documentation may
+# legitimately name the public binary in prose.
+bare_raw="$(grep -rEI --exclude-dir=.git --exclude-dir=bin --exclude-dir=obj \
   --exclude-dir=dist --exclude-dir=staging --exclude-dir=target \
   --exclude='*.jpeg' --exclude='*.jpg' \
   --exclude='audit-public-release.ps1' --exclude='audit-public-release.sh' \
-  -e "$BARE_PAT" "$ROOT" 2>/dev/null | grep -v -e '\.exe [0-9A-F]\{64\} bundle-' || true)"
+  -e "$BARE_PAT" "$ROOT" 2>/dev/null || true)"
+bare_hits="$(printf '%s\n' "$bare_raw" | grep -v -e '\.exe [0-9A-F]\{64\} bundle-' \
+  -e 'licensing service (razor-licgen' \
+  -e 'never in this repo' -e 'Never published' -e 'are never in this repo' \
+  -e 'No "tamper-proof"' -e 'is not the email' -e 'not the email transport' \
+  -e 'committed — enforced' -e 'workflows contain no secrets' -e 'No signing keys,' \
+  -e 'issued licenses, SMTP' -e 'razor-licgen., signing keys' -e 'no SMTP credentials' \
+  -e 'never needs SMTP' -e 'No account, password, SMTP server' \
+  -e 'No SMTP credentials, API keys, accounts' -e 'not referenced by public packaging' \
+  -e 'licence credentials (RAZOR_LICENSE' -e 'currently razor-train)' \
+  -e '\.gitignore:C:\\Temp$' || true)"
 if [ -n "$bare_hits" ]; then echo "$bare_hits"; echo "FAIL: bare private crate/dir name found"; FAIL=$((FAIL+1)); fi
 if [ -n "$hits" ]; then echo "$hits"; echo "FAIL: forbidden content patterns found"; FAIL=$((FAIL+1)); fi
 

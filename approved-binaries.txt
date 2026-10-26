@@ -1,4 +1,4 @@
-﻿# approved-binaries.txt — PUBLIC distribution allow-list.
+# approved-binaries.txt — PUBLIC distribution allow-list.
 # Generated from measured SHA-256 hashes of hardened bundle 20261024-221249
 # (established private hardening pipeline: dist build -> protector wrap -> integrity
 # sidecar -> test gates -> protected-binary smoke -> tamper-negative).
