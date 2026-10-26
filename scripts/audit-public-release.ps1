@@ -74,6 +74,12 @@ $benignExceptions = @(
   @{ File = 'razorzip-setup.iss'; Line = 'currently razor-train\)' }
   # .gitignore prohibition comment (the path itself is never committed).
   @{ File = '.gitignore'; Line = '^C:\\Temp$' }
+  # License-loader reference docs name the PUBLIC env-var contract
+  # (RAZOR_LICENSE / RAZOR_LICENSE_PUBLIC_KEY) users must set, and the
+  # loader module path for provenance. Names only — no values, keys, or
+  # license bodies appear in these files; value-bearing patterns still fail.
+  @{ File = 'docs\security\LICENSE-DIRS.md'; Line = '(?i)RAZOR_LICENSE' }
+  @{ File = 'docs\security\LICENSE-LOADER-PATHS.md'; Line = '(?i)RAZOR_LICENSE|razor_license::' }
 )
 
 function Is-Benign($relPath, $line) {

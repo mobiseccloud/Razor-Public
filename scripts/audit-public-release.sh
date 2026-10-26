@@ -58,7 +58,9 @@ hits="$(printf '%s\n' "$raw_hits" | grep -v -e 'licensing service (razor-licgen'
   -e 'razor-licgen., signing keys' -e 'no SMTP credentials' -e 'never needs SMTP' \
   -e 'No account, password, SMTP server' -e 'No SMTP credentials, API keys, accounts' \
   -e 'not referenced by public packaging' -e 'currently razor-train)' \
-  -e 'licence credentials (RAZOR_LICENSE' || true)"
+  -e 'licence credentials (RAZOR_LICENSE' \
+  -e 'LICENSE-DIRS.md:.*RAZOR_LICENSE' -e 'LICENSE-LOADER-PATHS.md:.*RAZOR_LICENSE' \
+  -e 'LICENSE-LOADER-PATHS.md:.*razor_license' || true)"
 # Prohibition comment in .gitignore (the path itself is never committed).
 hits="$(printf '%s\n' "$hits" | grep -v -e '\.gitignore:C:\\Temp$' || true)"
 # Allow-list entry lines (name + 64-hex hash + build id) are reviewed-benign.
@@ -80,6 +82,8 @@ bare_hits="$(printf '%s\n' "$bare_raw" | grep -v -e '\.exe [0-9A-F]\{64\} bundle
   -e 'never needs SMTP' -e 'No account, password, SMTP server' \
   -e 'No SMTP credentials, API keys, accounts' -e 'not referenced by public packaging' \
   -e 'licence credentials (RAZOR_LICENSE' -e 'currently razor-train)' \
+  -e 'LICENSE-DIRS.md:.*RAZOR_LICENSE' -e 'LICENSE-LOADER-PATHS.md:.*RAZOR_LICENSE' \
+  -e 'LICENSE-LOADER-PATHS.md:.*razor_license' \
   -e '\.gitignore:C:\\Temp$' || true)"
 if [ -n "$bare_hits" ]; then echo "$bare_hits"; echo "FAIL: bare private crate/dir name found"; FAIL=$((FAIL+1)); fi
 if [ -n "$hits" ]; then echo "$hits"; echo "FAIL: forbidden content patterns found"; FAIL=$((FAIL+1)); fi
