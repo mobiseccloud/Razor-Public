@@ -175,6 +175,22 @@ else
   fi
 fi
 
+# 7b. AppImage (real build when appimagetool + python3/Pillow exist).
+# Delegates to scripts/build-appimage.sh (same publish flags, AppDir layout,
+# smoke via --selftest inside that script's scope). SKIPPED cleanly otherwise.
+if ! command -v appimagetool >/dev/null 2>&1 && [ -z "${APPIMAGETOOL:-}" ]; then
+  rec "appimage" "SKIPPED" "appimagetool absent (set APPIMAGETOOL=/path). Script present: scripts/build-appimage.sh"
+elif ! python3 -c "import PIL" 2>/dev/null; then
+  rec "appimage" "SKIPPED" "python3/Pillow absent (needed for icon conversion)"
+else
+  if sh "$ROOT/scripts/build-appimage.sh" >/dev/null 2>&1; then
+    apphash="$(cut -d' ' -f1 "$DIST"/RazorZip-*-x86_64.AppImage.sha256 2>/dev/null | head -1)"
+    rec "appimage" "PASS" "dist/RazorZip-*-x86_64.AppImage built (sha256=$apphash)"
+  else
+    rec "appimage" "FAIL" "build-appimage.sh failed"
+  fi
+fi
+
 # 8. Manifest + exit code (SKIPPED is not failure; FAIL is).
 write_manifest
 if [ "$FAIL" -gt 0 ]; then exit 1; fi

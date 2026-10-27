@@ -15,26 +15,48 @@ SHIPPED (allow-listed in approved-binaries.txt, all gates passed):
       payload archival round-trip. Small-input archival limitation below does
       not affect its verified function.
 
-QUARANTINED (tested, FAILED or UNPROVEN — NOT distributed, NOT in allow-list):
-  razor-bench.exe
-    FAIL: deterministic RA-RT-FAIL on small inputs (e.g. 42/63/64/100/200-byte
-    samples incl. uniform-byte runs; 1000/4096-byte and realistic files pass).
-    Realistic corpora unaffected (62-file Suite-1 evidence: zero RT-FAILs),
-    but the byte-for-byte gate requires equality on the tested samples.
-  razor-watch.exe
-    FAIL: small log files fail archival with "verify decode failed: invalid
-    BDNA data: bad block size" (fail-closed warning, exit stays 0).
-    Realistic-size logs archive correctly.
-  razor-sfx-decode.exe
-    UNPROVEN for distribution: negatives all fail-closed correctly (empty /
-    garbage / truncated -> exit 1, no output) and one realistic 130680-byte
-    archive decoded byte-identical, but no in-scope payload producer exists
-    in this release to verify the small-input shape, and it shares the
-    archival framing with the confirmed encoder defect above.
-  Common root-cause area: small-input archival encode/framing in this build
-  (bundle-20261024-221249). Published benchmark evidence (all files >= ~400B)
-  is unaffected. A fixed build must re-pass the full gate battery before any
-  of these binaries ship.
+RE-QUALIFIED 2026-10-27 (defect fixed + verified; DISTRIBUTION PENDING,
+see hardening delta below). Source: private checkpoint 533cc6b
+(header-clamp eff.max(64) + 0x08 adaptive-Huffman decode arm), built
+--profile dist with RAZOR_GUARD_ENFORCE=1 from a clean worktree (+3
+git-ignored SFX/bin sources copied for the build only). Integrity sidecars
+generated with rzsign and verified; tamper-negative re-verified on the
+enforced build (corrupt sidecar -> silent exit 1). Qualified full-file
+SHA-256 (dist-profile, enforced, unpacked) recorded here for the record —
+these binaries are NOT staged for distribution:
+  razor-bench.exe  3236864 bytes  windows-x64
+    sha256: 320ECFB4E9D49F58B47CEE9B991713C4F037AA4D2EA369987904D1D8B925B950
+    sidecar: razor-bench.exe.integrity (present, hash matches)
+    gates: tiny-input matrix PASS (committed regression test); full Rust
+      suites 41+1/19/39/8/8/6 PASS; fresh-binary smoke on 33-file tiny corpus
+      (fast tier) exit 0 zero RT-FAIL; realistic file (bib, Max) exit 0 zero
+      RT-FAIL; ENFORCE=1 rebuild re-smoked clean.
+  razor-watch.exe  2231808 bytes  windows-x64
+    sha256: 9740065E98839513EE3C459BBEFEE20697638D193E373800AB3275C83715B5AB
+    sidecar: razor-watch.exe.integrity (present, hash matches)
+    gates: no-args usage exit 2 (no crash); --once run exit 0 (no crash);
+      small-log archival end-to-end (40/63/100/200/500-byte random + text):
+      6/6 archived, zero failure signatures; watcher output decoded
+      byte-identical via fresh sfx-decode (40B and 36B cases hash-verified).
+      Prior skip of the 40B file was rotation-safety (newest-file rule),
+      not a defect — confirmed by --include-active archival.
+  razor-sfx-decode.exe  1407488 bytes  windows-x64
+    sha256: BDFB658C6A87C4ABEC61D334712E7B855091CEA5D2FB70D9715FBB898C264DBF
+    sidecar: razor-sfx-decode.exe.integrity (present, hash matches)
+    gates: no-args usage exit 1; empty/garbage/truncated -> exit 1, no
+      output; verified the watcher small-log round trips above.
+
+HARDENING DELTA (blocks distribution, explicit, not silent): these three
+binaries have NOT received the protector wrap (tool absent on this
+machine; the 20261024 precedent standard includes it). Proof that the
+wrap is load-bearing, not cosmetic: the pipeline's integrity model
+requires full-file-hash sidecars, which only packed binaries produce
+(unpacked builds yield section-hash sidecars that fail the gate — observed
+and reverted 2026-10-27 rather than weakening the check). Everything else
+in the gate battery passed. A protector pass on a provisioned machine must
+regenerate these hashes and update the allow-list above before they match
+the established "hardened" bar. Until then they are QUALIFIED (defect
+fixed + verified), not fully-hardened, and NOT distributed.
 
 EXCLUDED BY DESIGN (never candidates for this release):
   razor-sfx-make.exe / razor-sfx-stub.exe / razorzip.exe (Tauri GUI) /

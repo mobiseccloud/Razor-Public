@@ -6,6 +6,18 @@ history is not published here.
 
 ## [Unreleased]
 
+- Quarantine reason resolved: small-input defect fixed (private checkpoint
+  `533cc6b`); fresh builds re-passed the full gate battery (see
+  `artifacts/hardened/MANIFEST.txt`). Distribution still awaits the
+  protector wrap — bench/watch/decode remain undistributed by policy.
+- License-loader paths verified per product
+  (`docs/security/LICENSE-LOADER-PATHS.md`); old drop-in directories retired.
+- AppImage pipeline added (`scripts/build-appimage.sh`, wired into
+  `build-installers.sh` as a gated step); first artifact smoke-tested
+  (`--selftest`/`--engines` green under WSL, clean-machine run still open).
+- First metric traces (`docs/benchmarks/metric-trace-20261027.csv`):
+  decompression 166 MB/s, log reclaim 91.34%, Rayon 2.15x (calgary),
+  early-exit proxy 5.39x; trainer gain unmeasured (no such mechanism).
 - Shipped first verified commercial binary: `razor-train.exe` + integrity
   sidecar (allow-listed, hash-verified, smoke/functional/tamper gates passed;
   see `artifacts/hardened/MANIFEST.txt`).

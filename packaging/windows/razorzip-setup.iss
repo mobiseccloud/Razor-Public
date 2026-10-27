@@ -13,8 +13,9 @@
 ;        .integrity sidecar digest.
 ;   Without /DCOMMERCIAL the commercial [Files]/[Icons] sections below are
 ;   excluded at compile time. The installer never fabricates binaries.
-;   Quarantined binaries (bench/watch/decode, see artifacts/hardened/MANIFEST.txt)
-;   are NOT referenced here even under /DCOMMERCIAL — ISCC fails closed if a
+;   Formerly quarantined binaries (bench/watch/decode, see
+;   artifacts/hardened/MANIFEST.txt) are verified fixed but await the
+;   protector wrap — NOT referenced here yet. ISCC fails closed if a
 ;   listed file is absent (no skip flags).
 ; - The trial page NEVER sends email: it opens the user's own email app with
 ;   a prefilled message (or offers copy-to-clipboard). Silent installs skip
@@ -61,7 +62,7 @@ Name: "harness"; Description: "Open benchmark GUI harness (Core)"; Types: full h
 Name: "cli"; Description: "CLI helpers (headless trial-template print)"; Types: full cli custom
 #ifdef COMMERCIAL
 Name: "engine"; Description: "Commercial Razor engine (allow-listed binaries only — currently razor-train)"; Types: full custom
-Name: "watcher"; Description: "Watcher service files (reserved for a future allow-listed watcher; installs nothing in this release)"; Types: full custom
+Name: "watcher"; Description: "Watcher service files (reserved for a qualified watcher build; installs nothing in this release)"; Types: full custom
 #endif
 
 [Files]
@@ -71,7 +72,9 @@ Source: "{#HarnessDir}\*"; DestDir: "{app}\harness"; Flags: ignoreversion recurs
 Source: "..\..\docs\trial\trial-request-template.txt"; DestDir: "{app}"; Flags: ignoreversion; Components: harness cli
 #ifdef COMMERCIAL
 ; Allow-listed commercial payload ONLY (currently: razor-train.exe).
-; Quarantined bench/watch/decode are deliberately NOT referenced.
+; Formerly quarantined bench/watch/decode are verified fixed (see
+; artifacts/hardened/MANIFEST.txt) but await the protector wrap before
+; distribution — they are deliberately NOT referenced here yet.
 ; ISCC fails closed here if a listed file is absent (no skip flags).
 Source: "..\..\artifacts\hardened\razor-train.exe"; DestDir: "{app}\engine"; Components: engine
 Source: "..\..\artifacts\hardened\razor-train.exe.integrity"; DestDir: "{app}\engine"; Components: engine

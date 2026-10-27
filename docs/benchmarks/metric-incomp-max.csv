@@ -1,0 +1,4 @@
+suite,corpus,file,engine,tier,original_bytes,compressed_bytes,ratio_percent,encode_ms,decode_ms,encode_mb_s,decode_mb_s,round_trip,status,timestamp_utc,host,threads,binary_version,format_version
+metric-incomp-20261027,incompressible-local,calgary.tar.gz,Razor,Max,1070276,1069964,99.97,7543,3,0.142,356.759,OK,PASS,2026-10-27T00:00:00Z,windows-dev-estate,1,chk-533cc6b-dist,archival
+metric-incomp-20261027,incompressible-local,cantrbry.tar.gz,Razor,Max,739071,627733,84.94,5528,8,0.134,92.384,OK,PASS,2026-10-27T00:00:00Z,windows-dev-estate,1,chk-533cc6b-dist,archival
+metric-incomp-20261027,incompressible-local,rand5m.bin,Razor,Max,5242880,5243000,100,27184,15,0.193,349.525,OK,PASS,2026-10-27T00:00:00Z,windows-dev-estate,1,chk-533cc6b-dist,archival

@@ -8,8 +8,11 @@
 # Only files named here may enter artifacts/hardened/, each with its matching
 # detached .integrity sidecar. No credentials, secrets, keys, or licenses.
 #
-# QUARANTINE NOTICE (2026-10-25, verified by independent functional gates):
-# bench, watcher and sfx extractor binaries were REMOVED from this list after
-# deterministic round-trip/verify-decode failures on small inputs
-# (see artifacts/hardened/MANIFEST.txt). They are not distributed.
+# QUARANTINE STATUS (2026-10-27): the small-input defect is FIXED
+# (private checkpoint 533cc6b) and fresh checkpoint builds re-passed the
+# full gate battery (see artifacts/hardened/MANIFEST.txt). Distribution
+# still awaits the protector wrap: the pipeline's integrity model requires
+# full-file-hash sidecars, which only packed binaries produce (tool absent
+# on the build machine). Bench/watch/decode are therefore NOT YET
+# distributed; their qualified hashes are recorded in MANIFEST.txt.
 razor-train.exe 5FE23DF5F4B525C78587B7284E4D7B7562AFEB9132CF17E9BDB2C560F63C138B bundle-20261024-221249 windows-x64 tuning-profile trainer (emit .rzprofile from sample corpora)

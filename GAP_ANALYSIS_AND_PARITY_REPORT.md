@@ -30,13 +30,13 @@ no deployments, no rebuilds performed for this report.
 |---|---|---|---|---|---|
 | 1 | Archival engine (Max/Balanced/Fast/MaxFast/UltraFast) | ✅ tournament + tiers | ✅ measured as black-box; CSVs shipped | n/a | PARITY |
 | 2 | Streaming + bounded memory | ✅ `compress_stream` | ✅ harness exercises stream cols | n/a | PARITY |
-| 3 | Log-archiver service | ✅ `razor-watch` (+ `--install`, systemd unit) | ⚠️ unit scaffold only, binary **quarantined** | n/a | **GAP — blocked on decoder re-qualification** |
-| 4 | SFX + spanning + AES-256 + JWT/OTP auth | ✅ make/stub flags + auth.rs | ⚠️ unproven in current build (bins quarantined) | n/a | **GAP — same blocker** |
-| 5 | `--stdout/--file/--quiet` zero-disk | ✅ stub, Pro-gated | ❌ not in any installer (no qualified binary) | n/a | **GAP — same blocker** |
+| 3 | Log-archiver service | ✅ `razor-watch` (+ `--install`, systemd unit) | ⚠️ unit scaffold only; binary defect-fixed + verified 2026-10-27 but undistributed (protector wrap pending) | n/a | **GAP — distribution blocked on protector tooling** |
+| 4 | SFX + spanning + AES-256 + JWT/OTP auth | ✅ make/stub flags + auth.rs | ⚠️ round-trip + spanning + auth gates verified 2026-10-27 on qualified builds; not distributed | n/a | **GAP — same blocker** |
+| 5 | `--stdout/--file/--quiet` zero-disk | ✅ stub, Pro-gated | ❌ not in any installer (no qualified binary); zero-tmp verified | n/a | **GAP — same blocker** |
 | 6 | `razor-train.exe` → `.rzprofile` | ✅ | ✅ allow-listed, bundled, hash-verified | n/a | PARITY |
 | 7 | Tier licensing + 14-day trial | ✅ `razor-license` gates | ✅ request flow + loader docs | ✅ intake+review live; issuance disabled | PARITY (manual fulfilment) |
-| 8 | Podium benchmark vs corpora | ✅ `razor-bench` + corpus/ | ✅ harness `--engines/--csvcheck/--selftest`; evidence CSVs | n/a | PARTIAL — harness has **no Run button** (documented); click-run bench exe = quarantined binary (**GAP**) |
-| 9 | AppImage (Linux) | n/a (not built anywhere) | ❌ absent | n/a | **GAP — new deliverable, never built** |
+| 8 | Podium benchmark vs corpora | ✅ `razor-bench` + corpus/ | ✅ harness `--engines/--csvcheck/--selftest`; evidence CSVs | n/a | PARTIAL — harness has **no Run button** (documented); click-run bench exe qualified but undistributed (same blocker) |
+| 9 | AppImage (Linux) | n/a (not built anywhere) | ✅ pipeline added 2026-10-27 (`scripts/build-appimage.sh`, gated step in `build-installers.sh`); artifact built + smoke green under WSL | n/a | PARTIAL — clean-machine run still open |
 | 10 | Browser/shell extensions | ❌ do not exist in ANY tree | ❌ | n/a | NOT APPLICABLE — no such components exist to verify |
 | 11 | Hybrid levels | private research (`experiment/hybrid-20261026-neutral`, NEUTRAL) | ❌ correctly absent | n/a | PARITY (kept out of launch by decision) |
 | 12 | Installer license dirs/placement | loader: flag→env→exe-adjacent | ✅ verified `LICENSE-LOADER-PATHS.md` (old `%PROGRAMDATA%` paths retired) | ✅ license email states placement + pubkey | PARITY |
@@ -100,12 +100,17 @@ no deployments, no rebuilds performed for this report.
 ## 6. Brief claims vs evidence (must reconcile before tester-facing use)
 
 Verified: Suite-1 table (Max 20.70% combined; enwik8 +2.0pp gap disclosed);
-trial unlock; quarantine boundaries. **Untraced to measurements**: 85–264+
-MB/s decompression band, 3.38–4.14× parallel speedups, 4.2× early-exit,
-"up to 90%", 85–92% log reclaim, 2–5% trainer gain. Do not ship these
-figures in tester material without per-claim measurement runs.
+trial unlock; quarantine boundaries. **Update 2026-10-27:** first traces in
+`docs/benchmarks/metric-calgary-max-{t1,auto}.csv` and
+`metric-incomp-max{,-fast}.csv` (standard schema, checkpoint-built binaries)
+— decompression 166 MB/s from Suite-1 totals (inside 85–264+ band), log
+reclaim 91.34% from suite2-logs totals (inside 85–92%), Rayon 2.15x on
+calgary (BELOW 3.38–4.14x: different workload/host, claim untraced on
+large workloads), early-exit proxy 5.39x (exceeds 4.2x on incompressible
+slice), trainer 2–5% UNMEASURED (no framing-weight mechanism; profiles steer
+tier recommendation only). Do not ship untraced figures in tester material.
 
-## 7. GitHub issue drafts (filing blocked: `gh auth login` required)
+## 7. GitHub issues (filed 2026-10-26 as #1–#5; bodies below for the record)
 
 ### Issue 1 — AppImage deliverable missing [enhancement]
 Body: No AppImage pipeline, tooling, or artifact exists for the Linux
@@ -145,3 +150,78 @@ appends), manifests hash-recorded; CI green path verified today
 Uncommitted working tree from this audit: this report (new, untracked),
 `LICENSE-LOADER-PATHS.md` (new), `LICENSE-DIRS.md` + both audit scripts
 (modified, exceptions only) — commit decision is the owner's.
+
+## 9. Execution addendum 2026-10-27 (master directive Tasks 1–6)
+
+### Task 1 — unquarantine: defect FIXED + verified, distribution BLOCKED
+- Clean worktree at private `533cc6b` (+3 git-ignored SFX/bin sources copied
+  for the build only); C: disk was full (0 B free) so all target dirs went
+  to `D:/Temp/rz-target` (reported, removable).
+- Full battery green: tiny-input regression test; Rust suites 41+1 / 19 /
+  39 / 8 / 8 / 6; C# solution 0 errors; C# streaming 33/33 + archival 33/33;
+  6 negatives fail-closed (exit 2; oversize-claim leaves a 500 B partial —
+  pre-existing deviation, exit code correct).
+- Fresh `--profile dist` + `RAZOR_GUARD_ENFORCE=1` builds: bench, watch,
+  sfx-decode/make/stub + rzsign. Sidecars generated + verified; tamper
+  negative re-verified (corrupt sidecar -> silent exit 1; audit-mode builds
+  do NOT enforce — enforcement requires the ENFORCE=1 build as the pipeline
+  does).
+- Watcher small-log end-to-end (40/63/100/200/500 B): 6/6 archived, zero
+  failure signatures; outputs decode byte-identical. The 40 B skip was
+  rotation-safety (newest-file rule), confirmed via `--include-active`.
+- **Blocker found by the pipeline itself**: `stage-commercial` failed —
+  rzsign emits section-hash (`text`) sidecars for unpacked binaries while
+  the gate requires full-file-hash (`full`) sidecars, which only packed
+  (protector-wrapped) binaries produce. The protector tool is absent on
+  this machine, so the wrap cannot run here. Rather than weaken the check,
+  the distribution changes were reverted: allow-list/MANIFEST/installer
+  restored to train-only, quarantine reason updated from "defect" to
+  "hardening delta". Qualified hashes are recorded in MANIFEST.txt.
+  Required next: protector pass on a provisioned machine, then re-hash.
+
+### Task 2 — AppImage: DONE (provisional)
+- `scripts/build-appimage.sh` (new) + gated step in `build-installers.sh`;
+  artifact `RazorZip-0.1.0-x86_64.AppImage` (41.8 MB) built, `--selftest`
+  and `--engines` green under WSL (FUSE present). Clean-machine run open.
+  Icon PNGs are generated at build time (python3/Pillow) — no brand asset
+  committed; appimagetool itself is provisioned per-machine (not in repo).
+
+### Task 3 — GUI/trial: DONE (within scope)
+- No dead buttons: all 4 XAML buttons map to implemented commands with
+  fallbacks; missing Run/Download/Settings are absent features, not dead
+  controls (Issue #2 stays open as enhancement).
+- Trial chain byte-verified: desktop Exec == shared mailto; decoded body
+  contains the canonical template; TrialEmail constants + length guard +
+  clipboard fallbacks reviewed. Interactive click stays clean-VM-only.
+  (Directive's `licensing@mobisec.cloud` appears nowhere — canonical
+  `razor@mobisec.cloud` held.)
+
+### Task 4 — enterprise suite: verified as far as shippable binaries allow
+- Watch: rotation detection, newest-file safety, purge via explicit flag,
+  no-crash gates. **New defect found**: config-file `auto_purge` does not
+  purge (explicit `--retention delete` works; unit test bypasses config
+  parsing) — file as new issue; test-hygiene note: state files default to
+  CWD, keep test dirs isolated.
+- SFX: 6-volume spanning continuous + byte-identical; password
+  right/wrong/missing fail closed; token-required halts without token.
+  Operational rule discovered: SFX binaries self-verify sidecars, so the
+  pipeline must re-sign AFTER `make` (renamed/appended copies fail silent
+  exit 1 — correct secure behavior, plus a PowerShell stdout-capture
+  artifact to avoid when measuring).
+- Train: emits valid `.rzprofile` (tier-recommendation mechanism).
+  **Deviation**: no entropy-framing-weight injection exists — the brief's
+  "2–5% via framing weights" has no code path; profiles steer tier choice.
+
+### Task 5 — metric traces: DONE (evidence committed)
+- `docs/benchmarks/metric-calgary-max-{t1,auto}.csv`,
+  `metric-incomp-max{,-fast}.csv` (standard schema, checkpoint-built
+  binaries; translator refuses failing rows): Rayon 2.15x byte-identical,
+  early-exit proxy 5.39x at +0.18% deviation, zero failures everywhere.
+  Decompression 166 MB/s + log reclaim 91.34% traced from Suite totals.
+  Trainer gain: UNMEASURED (no mechanism).
+
+### Task 6 — this commit (no push)
+- Audits PASS ×2, verify PASSED, no tracked binaries beyond the deliberate
+  `razor-train.exe` exception. Commit covers: Task 1 revert-state files,
+  AppImage script + installer step, metric CSVs, CHANGELOG, this report.
+  Push + tag decisions remain the owner's.
