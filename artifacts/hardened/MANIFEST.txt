@@ -47,16 +47,23 @@ these binaries are NOT staged for distribution:
       output; verified the watcher small-log round trips above.
 
 HARDENING DELTA (blocks distribution, explicit, not silent): these three
-binaries have NOT received the protector wrap (tool absent on this
-machine; the 20261024 precedent standard includes it). Proof that the
-wrap is load-bearing, not cosmetic: the pipeline's integrity model
-requires full-file-hash sidecars, which only packed binaries produce
-(unpacked builds yield section-hash sidecars that fail the gate — observed
-and reverted 2026-10-27 rather than weakening the check). Everything else
-in the gate battery passed. A protector pass on a provisioned machine must
+binaries have NOT received the protector wrap. The 20261024 precedent
+standard includes it, and proof that the wrap is load-bearing (not
+cosmetic): the pipeline's integrity model requires full-file-hash
+sidecars, which only packed binaries produce (unpacked builds yield
+section-hash sidecars that fail the gate — observed and reverted
+2026-10-27 rather than weakening the check). Everything else in the gate
+battery passed. A protector pass on a provisioned machine must
 regenerate these hashes and update the allow-list above before they match
 the established "hardened" bar. Until then they are QUALIFIED (defect
 fixed + verified), not fully-hardened, and NOT distributed.
+  2026-10-27 update: the protector tool IS present (v3.8.1, licensed) but
+  its tuned per-binary projects are missing (never committed). Console-
+  default wraps of the qualified builds die at startup (ENFORCE build:
+  silent 0xDEADC0DE; audit build: 0xC0000409 crash), while the precedent
+  tuned wrap runs fine here. Dead wrapped artifacts were deleted, not
+  staged. Filed as GitHub issue #8. Distribution stays held; no gate was
+  weakened to work around this.
 
 EXCLUDED BY DESIGN (never candidates for this release):
   razor-sfx-make.exe / razor-sfx-stub.exe / razorzip.exe (Tauri GUI) /
