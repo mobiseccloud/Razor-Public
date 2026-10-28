@@ -225,3 +225,21 @@ Uncommitted working tree from this audit: this report (new, untracked),
   `razor-train.exe` exception. Commit covers: Task 1 revert-state files,
   AppImage script + installer step, metric CSVs, CHANGELOG, this report.
   Push + tag decisions remain the owner's.
+
+## 10. One-click round addendum 2026-10-28 (commits 3c8d078, f66f503)
+
+Run/Download/Compare wired in GUI + headless (`--run`, `--fetch-manifest`);
+proven end-to-end against real downloads (2 verified + local-only skip,
+2 PASS rows, 14 skipped, 0 errors). Unavailable engines count SKIPPED,
+never fabricated; only measured PASS/RT-FAIL cells become rows. Commercial
+paths via `RAZORBENCH_ENGINE_<NAME>_<TIER>` or stay SKIPPED. Selftest covers
+matrix fakes incl. a `--selftest-sleep` timeout hook. A real Linux exec bug
+(multi-word commands truncated by `sh -c` argv splitting) was caught by the
+AppImage selftest and fixed. Brand PNG committed (`assets/icon_primary_256.png`);
+AppImage rebuilt + smoke green. AppStream metainfo deferred (validator
+fatals under WSL paths). Issue #6 (config purge) was filed in error and
+corrected + closed after a clean retest proved purge works; lesson: watch
+state defaults to CWD, isolate test dirs. Issue #7 fixed in working tree
+(narrowed `bin/` ignore; uncommitted, private repo). Issues #1/#2 updated
+with progress. Licensing service live and healthy, issuance disabled.
+
