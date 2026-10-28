@@ -6,6 +6,16 @@ history is not published here.
 
 ## [Unreleased]
 
+- One-click benchmark flow (harness + headless): `RunMatrixAsync` runs
+  verified cached Suite 1 files through every available engine as a
+  cancellable background task (GUI Run button) or via `--run <manifest>
+  --out <csv>`; `--fetch-manifest` provisions the corpus the same way the
+  GUI Download button does. Unavailable engines count as SKIPPED, never
+  fabricated; only measured PASS/RT-FAIL cells become CSV rows (see
+  METHODOLOGY). Commercial engine paths resolve via
+  `RAZORBENCH_ENGINE_<NAME>_<TIER>` or stay SKIPPED. Selftest now also
+  covers manifest parsing, downloader verification, matrix fakes
+  (PASS/RT-FAIL/SKIPPED/TIMEOUT), and comparison math.
 - Quarantine reason resolved: small-input defect fixed (private checkpoint
   `533cc6b`); fresh builds re-passed the full gate battery (see
   `artifacts/hardened/MANIFEST.txt`). Distribution still awaits the

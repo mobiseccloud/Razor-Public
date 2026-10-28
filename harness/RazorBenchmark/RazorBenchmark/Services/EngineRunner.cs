@@ -71,4 +71,30 @@ public static class EngineRunner
         }
         catch { return false; }
     }
+
+    /// <summary>
+    /// Runs a shell command string (engine arg templates support shell
+    /// redirection). Windows: <c>cmd /c</c>; Unix: <c>/bin/sh -c</c>.
+    /// Same timeout/kill/cancel contract as <see cref="RunAsync"/>.
+    /// </summary>
+    public static Task<ProcessResult> RunShellAsync(
+        string command, string workDir, int timeoutMs, CancellationToken ct)
+    {
+        if (OperatingSystem.IsWindows())
+            return RunAsync("cmd", "/c " + command, workDir, timeoutMs, ct);
+        return RunAsync("/bin/sh", "-c " + command, workDir, timeoutMs, ct);
+    }
+
+    /// <summary>
+    /// Runs an engine invocation: executable plus an already-substituted arg
+    /// template, through the platform shell. Executables containing spaces
+    /// are quoted (e.g. commercial tools under Program Files).
+    /// </summary>
+    public static Task<ProcessResult> RunShellAsync(
+        string exe, string templatedArgs, string workDir,
+        int timeoutMs, CancellationToken ct)
+    {
+        var q = exe.Contains(' ') && !exe.StartsWith('"') ? "\"" + exe + "\"" : exe;
+        return RunShellAsync(q + " " + templatedArgs, workDir, timeoutMs, ct);
+    }
 }

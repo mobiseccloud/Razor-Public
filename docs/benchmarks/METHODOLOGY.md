@@ -33,6 +33,15 @@ the portable claims.
    comparison columns).
 3. Run matrix → export CSV → compare (file, engine, tier, sizes, ratio, status).
 
+## Row convention (harness runs)
+
+Emitted CSV rows cover measured cells only: PASS (measured sizes) and
+RT-FAIL (measured sizes, `MISMATCH`). ERROR (engine crash/missing output),
+TIMEOUT, and SKIPPED (unavailable engine) cells are counted in the run
+summary and console/GUI status — never emitted as pseudo-data rows. This
+keeps every emitted file inside the verified schema (positive sizes,
+arithmetically consistent ratios).
+
 ## What is NOT claimed
 
 - No multi-thread scaling claim beyond the recorded `threads` field.

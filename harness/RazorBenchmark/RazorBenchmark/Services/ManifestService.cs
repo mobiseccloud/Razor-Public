@@ -39,4 +39,24 @@ public static class ManifestService
         return string.Equals(actual, entry.Sha256, StringComparison.OrdinalIgnoreCase)
             && new FileInfo(localPath).Length == entry.ExpectedBytes;
     }
+
+    /// <summary>
+    /// Local corpus cache root (per-user application data). Never fabricated:
+    /// callers create directories explicitly before downloading.
+    /// </summary>
+    public static string CorpusCacheRoot()
+        => Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "RazorBenchmark", "corpus");
+
+    /// <summary>
+    /// Resolves a manifest cache_location template (%CORPUS_CACHE% prefix,
+    /// either slash style) to a local path.
+    /// </summary>
+    public static string ResolveCachePath(string template)
+    {
+        var expanded = template.Replace("%CORPUS_CACHE%", CorpusCacheRoot());
+        return expanded.Replace('\\', Path.DirectorySeparatorChar)
+            .Replace('/', Path.DirectorySeparatorChar);
+    }
 }

@@ -23,7 +23,9 @@
             <TextBlock Grid.Row="7" Grid.Column="0" Text="Ratio / RT: " /><TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding Ratio}" />
           </Grid>
           <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="Run Benchmark" Command="{Binding RunBenchmarkCommand}" ToolTip.Tip="Runs verified cached Suite 1 files through every available engine (background task, cancellable). Unavailable engines are counted as skipped, never fabricated." />
             <Button Content="Export CSV" Command="{Binding ExportCsvCommand}" />
+            <Button Content="Compare With Published" Command="{Binding CompareWithPublishedCommand}" ToolTip.Tip="Compares current rows against docs/benchmarks/suite1-max.csv and reports ratio deviation." />
             <Button Content="Cancel" Command="{Binding CancelCommand}" />
           </StackPanel>
           <DataGrid ItemsSource="{Binding Rows}" AutoGenerateColumns="True" IsReadOnly="True" Height="280" />
@@ -45,11 +47,14 @@
         </StackPanel>
       </ScrollViewer>
     </TabItem>
-    <TabItem Header="Corpora">
+      <TabItem Header="Corpora">
       <StackPanel Margin="8" Spacing="6">
         <TextBlock Text="Corpus tabs — only datasets actually present/configured are listed." FontWeight="Bold" />
         <ListBox ItemsSource="{Binding Suites}" SelectedItem="{Binding Suite}" />
         <TextBlock Text="Use the manifest-pinned downloader (SHA-256 verified, mismatch rejected). Local-only entries are skipped, never fabricated." TextWrapping="Wrap" />
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <Button Content="Download Suite 1 Corpus" Command="{Binding DownloadCorpusCommand}" ToolTip.Tip="Downloads manifest-suite1.csv entries with SHA-256 verification (local-only entries skipped)." />
+        </StackPanel>
       </StackPanel>
     </TabItem>
     <TabItem Header="Engines">

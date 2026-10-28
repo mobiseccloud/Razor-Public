@@ -1,6 +1,8 @@
 using RazorBenchmark.Models;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -84,5 +86,56 @@ public static class DownloaderService
             }
         }
         throw last ?? new IOException("Download failed for " + entry.File);
+    }
+
+    public sealed class FetchSummary
+    {
+        public int Verified;
+        public int LocalOnlySkipped;
+        public List<string> Failed { get; } = new();
+    }
+
+    /// <summary>
+    /// Downloads every entry of a manifest file (shared by the GUI Download
+    /// button and headless --fetch-manifest). Local-only entries are skipped,
+    /// failures are collected (never thrown past the summary), cancellation
+    /// is honored. Returns counts; callers render them.
+    /// </summary>
+    public static async Task<FetchSummary> FetchManifestAsync(
+        string manifestPath,
+        Func<CorpusEntry, string> resolveCacheDir,
+        IProgress<(CorpusEntry Entry, DownloadProgress Progress)>? progress,
+        int maxRetries,
+        CancellationToken ct)
+    {
+        var summary = new FetchSummary();
+        List<CorpusEntry> entries;
+        try { entries = ManifestService.Read(manifestPath).ToList(); }
+        catch (Exception ex)
+        {
+            summary.Failed.Add("manifest: " + ex.Message);
+            return summary;
+        }
+        foreach (var entry in entries)
+        {
+            ct.ThrowIfCancellationRequested();
+            try
+            {
+                var dir = resolveCacheDir(entry);
+                var localProgress = new Progress<DownloadProgress>(p =>
+                    progress?.Report((entry, p)));
+                await FetchAsync(entry, dir, localProgress, maxRetries, ct);
+                summary.Verified++;
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("not publicly downloadable"))
+            {
+                summary.LocalOnlySkipped++;
+            }
+            catch (Exception ex)
+            {
+                summary.Failed.Add(entry.File + ": " + ex.Message);
+            }
+        }
+        return summary;
     }
 }
