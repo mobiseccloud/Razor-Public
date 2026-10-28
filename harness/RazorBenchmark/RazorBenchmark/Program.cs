@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading;
 
 namespace RazorBenchmark;
 
@@ -142,15 +141,28 @@ internal sealed class Program
                         var input = System.IO.Path.Combine(dir, "in.bin");
                         System.IO.File.WriteAllBytes(input, new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 });
                         var isWin = OperatingSystem.IsWindows();
-                        var copyExe = isWin ? "cmd" : "sh";
-                        var copyArgs = isWin ? "/c copy /y" : "-c cp";
-                        var garbageArgs = isWin ? "/c echo garbage >" : "-c \"printf garbage >";
+                        // Fake engines must be plain commands WITHOUT a shell
+                        // prefix: RunMatrix already wraps once in cmd/sh.
+                        // (Embedding `cmd /c` or `sh -c` here double-wraps:
+                        // harmless on cmd, broken on sh which takes exactly
+                        // one command string.)
+                        var copyExe = isWin ? "cmd" : "cp";
+                        var copyArgs = isWin ? "/c copy /y" : "";
                         var copySpec = new Models.EngineSpec("fake", "copy", copyExe,
                             copyArgs + " \"{input}\" \"{output}\"",
                             copyArgs + " \"{input}\" \"{output}\"", "", "");
+                        // Garbage fake: copies a FIXED 8-byte payload instead of
+                        // the input, so encode and decode both succeed yet the
+                        // round-trip mismatches deterministically (RT-FAIL).
+                        // No shell metacharacters: pure exe + quoted paths.
+                        var garbageSrc = System.IO.Path.Combine(dir, "garbage.bin");
+                        System.IO.File.WriteAllBytes(garbageSrc,
+                            System.Text.Encoding.ASCII.GetBytes("garbage!"));
+                        var garbageTemplate = isWin
+                            ? "/c copy /y \"" + garbageSrc + "\" \"{output}\""
+                            : "\"" + garbageSrc + "\" \"{output}\"";
                         var garbageSpec = new Models.EngineSpec("fake", "garbage", copyExe,
-                            garbageArgs + " \"{output}\"",
-                            garbageArgs + " \"{output}\"", "", "");
+                            garbageTemplate, garbageTemplate, "", "");
                         var cts = new CancellationTokenSource();
                         var rowsPG = Services.BenchmarkService.RunMatrixAsync(
                             "selftest", "selftest", new[] { input },
@@ -161,7 +173,8 @@ internal sealed class Program
                         var t = Services.BenchmarkService.LastTotals;
                         if (t.Passed != 1 || t.RoundTripFailures != 1 || rowsPG.Count != 2)
                             throw new InvalidOperationException(
-                                $"matrix fake engines wrong: pass={t.Passed} rtfail={t.RoundTripFailures} rows={rowsPG.Count}");
+                                $"matrix fake engines wrong: pass={t.Passed} rtfail={t.RoundTripFailures} "
+                                + $"error={t.Errors} timeout={t.Timeouts} skipped={t.Skipped} rows={rowsPG.Count}");
                         if (!rowsPG.All(r => r.Status == "PASS" || r.Status == "RT-FAIL"))
                             throw new InvalidOperationException("unexpected matrix row status");
                         // Missing executable => SKIPPED count, no row.

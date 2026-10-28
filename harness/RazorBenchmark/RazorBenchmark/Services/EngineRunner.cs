@@ -73,8 +73,9 @@ public static class EngineRunner
     }
 
     /// <summary>
-    /// Runs a shell command string (engine arg templates support shell
-    /// redirection). Windows: <c>cmd /c</c>; Unix: <c>/bin/sh -c</c>.
+    /// Runs a shell command string. Windows <c>cmd /c</c> takes the rest of
+    /// the line, but POSIX <c>sh -c</c> takes exactly one argument, so the
+    /// command is quoted as a single argv element (inner quotes escaped).
     /// Same timeout/kill/cancel contract as <see cref="RunAsync"/>.
     /// </summary>
     public static Task<ProcessResult> RunShellAsync(
@@ -82,7 +83,8 @@ public static class EngineRunner
     {
         if (OperatingSystem.IsWindows())
             return RunAsync("cmd", "/c " + command, workDir, timeoutMs, ct);
-        return RunAsync("/bin/sh", "-c " + command, workDir, timeoutMs, ct);
+        var escaped = command.Replace("\"", "\\\"");
+        return RunAsync("/bin/sh", "-c \"" + escaped + "\"", workDir, timeoutMs, ct);
     }
 
     /// <summary>

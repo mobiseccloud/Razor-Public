@@ -35,24 +35,23 @@ mkdir -p "$APPDIR/usr/lib/razorzip" "$APPDIR/usr/share/applications" \
 cp -a "$PUB" "$APPDIR/usr/lib/razorzip/harness"
 mkdir -p "$APPDIR/usr/bin"
 ln -sf ../lib/razorzip/harness/RazorBenchmark "$APPDIR/usr/bin/razor-benchmark"
+# NOTE: no AppStream metainfo file is generated: appstreamcli validation
+# fails the appimagetool build on warnings in this environment
+# (desktop-file-not-found under WSL/DrvFs paths), while a missing metainfo
+# file is only a warning. Revisit with a native-Linux build host (it can
+# carry id, homepage, and stock icon references).
 cp "$ROOT/assets/icon_primary.jpg" \
   "$APPDIR/usr/share/icons/hicolor/256x256/apps/razorzip.jpg"
-cp "$ROOT/assets/icon_primary.jpg" "$APPDIR/.DirIcon"
-# AppImage needs a PNG icon at the AppDir root (brand PNGs are an owner
-# decision — generate from the approved JPG at build time instead).
-if ! python3 -c "import PIL" 2>/dev/null; then
-  echo "SKIP: python3+Pillow required for icon conversion (pip install pillow)"
-  exit 3
+# Committed brand PNG (assets/icon_primary_256.png, rendered from the
+# approved primary JPG). No build-time conversion, fully deterministic.
+if [ ! -f "$ROOT/assets/icon_primary_256.png" ]; then
+  echo "FAIL: assets/icon_primary_256.png missing"
+  exit 1
 fi
-python3 - "$ROOT/assets/icon_primary.jpg" "$APPDIR" <<'PYEOF'
-import sys
-from PIL import Image
-src, appdir = sys.argv[1], sys.argv[2]
-img = Image.open(src).convert("RGB").resize((256, 256))
-img.save(appdir + "/razorzip.png")
-img.save(appdir + "/usr/share/icons/hicolor/256x256/apps/razorzip.png")
-img.save(appdir + "/.DirIcon.png")
-PYEOF
+cp "$ROOT/assets/icon_primary_256.png" "$APPDIR/razorzip.png"
+cp "$ROOT/assets/icon_primary_256.png" \
+  "$APPDIR/usr/share/icons/hicolor/256x256/apps/razorzip.png"
+cp "$ROOT/assets/icon_primary_256.png" "$APPDIR/.DirIcon"
 cat > "$APPDIR/razorzip.desktop" <<'EOF'
 [Desktop Entry]
 Name=RazorZip Benchmark
@@ -60,7 +59,7 @@ Comment=Open benchmark harness for the Razor compression engine (Core features)
 Exec=RazorBenchmark
 Icon=razorzip
 Type=Application
-Categories=Utility;System;
+Categories=Utility;
 Terminal=false
 StartupWMClass=RazorBenchmark
 EOF
